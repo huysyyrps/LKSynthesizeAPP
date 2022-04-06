@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">鲁科检测系统</string>
+    <string-array name="model_array">
+        <item>211223</item>
+        <item>5s</item>
+    </string-array>
+
+    <string-array name="cpugpu_array">
+        <item>CPU</item>
+        <item>GPU</item>
+    </string-array>
+
+
+    <string name="title_tips">提示</string>
+    <string name="title_tips_save">保存</string>
+    <string name="title_tips_up">提交</string>
+    <string name="title_tips_confim">确定</string>
+    <string name="title_tips_cancel">取消</string>
+    <string name="QR_code">二维码扫描</string>
+    <string name="viewfinderview_status_text1">将二维码放入取景框内</string>
+
+
+    <string name="handler_data">业务处理中</string>
+    <string name="updata_found">上传方式</string>
+    <string name="updata_local">本地存储</string>
+    <string name="updata_socket">实时上传</string>
+</resources>

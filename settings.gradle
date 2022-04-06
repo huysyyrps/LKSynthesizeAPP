@@ -1,0 +1,20 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+        // 配置华为SCAN二维码扫描。
+        maven { url 'https://developer.huawei.com/repo/' }
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        // 配置华为SCAN二维码扫描。
+        maven { url 'https://developer.huawei.com/repo/' }
+    }
+}
+rootProject.name = "LKSynthesizeAPP"
+include ':app'
