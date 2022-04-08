@@ -18,7 +18,6 @@ import com.example.lksynthesizeapp.R;
 import com.example.lksynthesizeapp.SharePreferencesUtils;
 import com.huawei.hms.hmsscankit.OnResultCallback;
 import com.huawei.hms.hmsscankit.RemoteView;
-import com.huawei.hms.hmsscankit.ScanUtil;
 import com.huawei.hms.ml.scan.HmsScan;
 
 import java.util.List;
@@ -34,7 +33,9 @@ public class DefinedActivity extends BaseActivity implements EasyPermissions.Per
     private RemoteView remoteView;
     DefinedPresenter definedPresenter;
     final int SCAN_FRAME_SIZE = 240;
-    String[] PERMS = {Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION};
+    String[] PERMS = {Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.RECORD_AUDIO,Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.FOREGROUND_SERVICE};
     SharePreferencesUtils sharePreferencesUtils;
 
     @Override
@@ -56,24 +57,6 @@ public class DefinedActivity extends BaseActivity implements EasyPermissions.Per
         rect.top = mScreenHeight / 2 - scanFrameSize / 2;
         rect.bottom = mScreenHeight / 2 + scanFrameSize / 2;
         remoteView = new RemoteView.Builder().setContext(this).setBoundingBox(rect).setFormat(HmsScan.ALL_SCAN_TYPE).build();
-        remoteView.setOnResultCallback(new OnResultCallback() {
-            @Override
-            public void onResult(HmsScan[] result) {
-                if (tag.equals("first")){
-                    if (result != null && result.length > 0 && result[0] != null) {
-                        if (result[0].getOriginalValue()!=null){
-                            String[] data=result[0].getOriginalValue().split("/");
-                            sharePreferencesUtils.setString(DefinedActivity.this, "max", data[2]);
-                            definedPresenter.getDefined(data[0]);
-                            startActivity(new Intent(DefinedActivity.this, SendSelectActivity.class));
-                            finish();
-                            tag = "second";
-                            return;
-                        }
-                    }
-                }
-            }
-        });
         remoteView.onCreate(savedInstanceState);
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         frameLayout.addView(remoteView, params);
@@ -92,6 +75,25 @@ public class DefinedActivity extends BaseActivity implements EasyPermissions.Per
              */
             EasyPermissions.requestPermissions(this, "PERMISSION_STORAGE_MSG", Constant.TAG_ONE, PERMS);
         }
+
+        remoteView.setOnResultCallback(new OnResultCallback() {
+            @Override
+            public void onResult(HmsScan[] result) {
+                if (tag.equals("first")){
+                    if (result != null && result.length > 0 && result[0] != null) {
+                        if (result[0].getOriginalValue()!=null){
+                            String[] data=result[0].getOriginalValue().split("/");
+                            sharePreferencesUtils.setString(DefinedActivity.this, "max", data[2]);
+                            definedPresenter.getDefined(data[0]);
+                            startActivity(new Intent(DefinedActivity.this, SendSelectActivity.class));
+                            finish();
+                            tag = "second";
+                            return;
+                        }
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -137,12 +139,6 @@ public class DefinedActivity extends BaseActivity implements EasyPermissions.Per
     protected void onStart() {
         super.onStart();
         remoteView.onStart();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        remoteView.onResume();
     }
 
     @Override

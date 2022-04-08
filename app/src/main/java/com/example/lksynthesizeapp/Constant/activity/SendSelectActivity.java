@@ -18,7 +18,7 @@ import android.widget.Toast;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.lksynthesizeapp.ChiFen.LocalActivity;
+import com.example.lksynthesizeapp.ChiFen.Activity.LocalActivity;
 import com.example.lksynthesizeapp.Constant.Base.AlertDialogUtil;
 import com.example.lksynthesizeapp.Constant.Base.DialogCallBack;
 import com.example.lksynthesizeapp.Constant.Base.EditTextLengClient;
