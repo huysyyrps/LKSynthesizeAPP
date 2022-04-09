@@ -18,6 +18,7 @@ import android.widget.Toast;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.lksynthesizeapp.ChiFen.Activity.BroadcastActivity;
 import com.example.lksynthesizeapp.ChiFen.Activity.LocalActivity;
 import com.example.lksynthesizeapp.Constant.Base.AlertDialogUtil;
 import com.example.lksynthesizeapp.Constant.Base.DialogCallBack;
@@ -138,11 +139,11 @@ public class SendSelectActivity extends AppCompatActivity {
                 startActivity(intent);
             } else if (data.equals("实时上传")) {
                 sharePreferencesUtils.setString(SendSelectActivity.this, "sendSelect", "实时上传");
-//                intent = new Intent(SendSelectActivity.this, MainBroadcastActivity.class);
-//                intent.putExtra("project", etProject.getText().toString().trim());
-//                intent.putExtra("etWorkName", etWorkName.getText().toString().trim());
-//                intent.putExtra("etWorkCode", etWorkCode.getText().toString().trim());
-//                startActivity(intent);
+                intent = new Intent(SendSelectActivity.this, BroadcastActivity.class);
+                intent.putExtra("project", etProject.getText().toString().trim());
+                intent.putExtra("etWorkName", etWorkName.getText().toString().trim());
+                intent.putExtra("etWorkCode", etWorkCode.getText().toString().trim());
+                startActivity(intent);
             }
         }
     }

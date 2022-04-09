@@ -3,6 +3,7 @@ pluginManagement {
         gradlePluginPortal()
         google()
         mavenCentral()
+        maven { url 'https://www.jitpack.io' }
         // 配置华为SCAN二维码扫描。
         maven { url 'https://developer.huawei.com/repo/' }
     }
@@ -12,8 +13,11 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://www.jitpack.io' }
         // 配置华为SCAN二维码扫描。
         maven { url 'https://developer.huawei.com/repo/' }
+        // 个推
+        maven {url "https://mvn.getui.com/nexus/content/repositories/releases/"}
     }
 }
 rootProject.name = "LKSynthesizeAPP"

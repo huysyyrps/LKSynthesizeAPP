@@ -10,6 +10,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
+import com.igexin.sdk.IUserLoggerInterface;
+import com.igexin.sdk.PushManager;
+
 /**
  * @author: Allen.
  * @date: 2018/7/25
@@ -25,29 +28,27 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-//        notificationChannelManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            AudioAttributes att = new AudioAttributes.Builder()
-//                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-//                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-//                    .build();
-//            Uri sound=Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + getPackageName() + "/"+R.raw.fengming);
-//            NotificationChannel huifangcannel = new NotificationChannel("huifang", "回访提示音", NotificationManager.IMPORTANCE_HIGH);
-//            huifangcannel.setSound(sound, att);
-//            notificationChannelManager.createNotificationChannel(huifangcannel);
-//        }
-//
-//
+        notificationChannelManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            AudioAttributes att = new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .build();
+            Uri sound=Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + getPackageName() + "/"+R.raw.fengming);
+            NotificationChannel huifangcannel = new NotificationChannel("huifang", "回访提示音", NotificationManager.IMPORTANCE_HIGH);
+            huifangcannel.setSound(sound, att);
+            notificationChannelManager.createNotificationChannel(huifangcannel);
+        }
 //        MobSDK.submitPolicyGrantResult(true, null);
-//        myApp = this;
+        myApp = this;
         context = getApplicationContext();
-//        PushManager.getInstance().initialize(this);
-//        PushManager.getInstance().setDebugLogger(this, new IUserLoggerInterface() {
-//            @Override
-//            public void log(String s) {
-//                Log.e("PUSH_LOG",s);
-//            }
-//        });
+        PushManager.getInstance().initialize(this);
+        PushManager.getInstance().setDebugLogger(this, new IUserLoggerInterface() {
+            @Override
+            public void log(String s) {
+                Log.e("PUSH_LOG",s);
+            }
+        });
 //        //初始化线程池管理器
 //        initThreadPool();
     }

@@ -18,6 +18,12 @@ android {
                 cppFlags '-std=c++11'
             }
         }
+        //个推
+        manifestPlaceholders = [
+                //从 3.1.2.0 版本开始，APPID 占位符从 GETUI_APP_ID 切换为 GETUI_APPID
+                //后续所有产品的 APPID 均统一配置为 GETUI_APPID 占位符
+                GETUI_APPID       : "iinLTplUFn7b8Zy2dl8755",
+        ]
     }
 
     buildTypes {
@@ -78,4 +84,10 @@ dependencies {
     //glide
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
+    //既构推流
+    implementation 'com.github.zegolibrary:express-video:2.15.0'
+    //个推SDK
+    implementation 'com.getui:gtsdk:3.2.9.0'
+    //个推核心组件
+    implementation 'com.getui:gtc:3.1.7.0'
 }

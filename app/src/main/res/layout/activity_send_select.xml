@@ -130,10 +130,10 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:lineHeight="17dp"
+                android:lineHeight="15dp"
                 android:text="\t\t\请在选择“上传方式”之前填写“工程名称”、“工件名称”、“工件编号”等信息，便于电脑端查找和分类."
                 android:textColor="@color/ziti"
-                android:textSize="15dp" />
+                android:textSize="13dp" />
         </LinearLayout>
     </LinearLayout>
 
