@@ -1,9 +1,20 @@
 package com.example.lksynthesizeapp;
 
+import com.example.lksynthesizeapp.ChiFen.bean.PhotoUp;
+import com.example.lksynthesizeapp.ChiFen.bean.Video;
 import com.example.lksynthesizeapp.Constant.Bean.Defined;
 
+import java.util.List;
+
 import io.reactivex.Observable;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Headers;
+import retrofit2.http.Multipart;
+import retrofit2.http.POST;
+import retrofit2.http.Part;
 import retrofit2.http.Query;
 
 /**
@@ -31,22 +42,22 @@ public interface AllApi {
 //    Observable<Login> getLogin(@Field("username") String username, @Field("password") String password);
 //
 //
-//    /**
-//     * 图片上传
-//     *  @GET(ApiAddress.login)
-//     */
-//    @POST(ApiAddress.photoup)
-//    @Headers({"Content-Type:application/json; charset=UTF-8"})
-//    Observable<PhotoUp> getPhoto(@Body RequestBody body);
-//
-//    /**
-//     * 视频上传
-//     *  @GET(ApiAddress.login)
-//     */
-//
-//    @Multipart
-//    @POST(ApiAddress.havevideoup)
-//    Observable<HaveVideoUp> getHaveVideoUp(@Part List<MultipartBody.Part> partList);
+    /**
+     * 图片上传
+     *  @GET(ApiAddress.login)
+     */
+    @POST(ApiAddress.photoup)
+    @Headers({"Content-Type:application/json; charset=UTF-8"})
+    Observable<PhotoUp> getPhoto(@Body RequestBody body);
+
+    /**
+     * 视频上传
+     *  @GET(ApiAddress.login)
+     */
+
+    @Multipart
+    @POST(ApiAddress.havevideoup)
+    Observable<Video> getHaveVideoUp(@Part List<MultipartBody.Part> partList);
 //
 //    /**
 //     * 日志上传

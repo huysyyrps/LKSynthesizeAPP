@@ -23,12 +23,6 @@
         android:supportsRtl="true"
         android:theme="@style/NoAction">
         <activity
-            android:name=".ChiFen.Activity.VideoActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ChiFen.Activity.PhotoActivity"
-            android:exported="false" />
-        <activity
             android:name=".test.TestActivity"
             android:exported="false" />
         <activity
@@ -47,6 +41,18 @@
         <activity android:name=".Constant.activity.SendSelectActivity" />
         <activity
             android:name=".ChiFen.Activity.LocalActivity"
+            android:exported="false"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".ChiFen.Activity.PhotoActivity"
+            android:exported="false"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".ChiFen.Activity.SeeImageOrVideoActivity"
+            android:exported="false"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".ChiFen.Activity.VideoActivity"
             android:exported="false"
             android:screenOrientation="landscape" />
     </application>

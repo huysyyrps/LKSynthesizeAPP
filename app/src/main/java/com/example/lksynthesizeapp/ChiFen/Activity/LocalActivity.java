@@ -8,6 +8,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.hardware.display.DisplayManager;
+import android.hardware.display.VirtualDisplay;
+import android.media.Image;
+import android.media.ImageReader;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
@@ -16,6 +20,8 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.StrictMode;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -49,6 +55,7 @@ import com.example.lksynthesizeapp.Constant.Net.getIp;
 import com.example.lksynthesizeapp.R;
 
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import butterknife.BindView;
@@ -84,8 +91,15 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
     @BindView(R.id.linlayoutData)
     LinearLayout linlayoutData;
 
+    private Toast toast;
     String address;
     String toastData = "";
+    private int mWindowWidth;
+    private int mWindowHeight;
+    private int mScreenDensity;
+    private ImageReader mImageReader;
+    private VirtualDisplay mVirtualDisplay;
+    private WindowManager mWindowManager;
     private ScreenRecorder mRecorder;
     private Notifications mNotifications;
     private MediaProjection mMediaProjection;
@@ -102,12 +116,23 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
         super.onCreate(savedInstanceState);
         ButterKnife.bind(this);
         setWorkData();
+        mWindowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        mWindowWidth = mWindowManager.getDefaultDisplay().getWidth();
+        mWindowHeight = mWindowManager.getDefaultDisplay().getHeight();
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        mWindowManager.getDefaultDisplay().getMetrics(displayMetrics);
+        mScreenDensity = displayMetrics.densityDpi;
+        mImageReader = ImageReader.newInstance(mWindowWidth, mWindowHeight, 0x1, 2);
         frameLayout.setBackgroundColor(getResources().getColor(R.color.black));
         //全屏设置
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         mMediaProjectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
         mNotifications = new Notifications(getApplicationContext());
+        if (mMediaProjection == null) {
+            requestMediaProjection();
+        }
+
 
         webView.setBackgroundColor(Color.BLACK);
         webView.getSettings().setJavaScriptEnabled(true);
@@ -159,21 +184,38 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
         switch (view.getId()) {
             case R.id.rbCamera:
                 radioGroup.setVisibility(View.GONE);
-                new BottomUI().hideBottomUIMenu(this.getWindow());
-                View imageView = view.getRootView();
-                imageView.setDrawingCacheEnabled(true);
-                imageView.buildDrawingCache();
-                Bitmap mBitmap = imageView.getDrawingCache();
-                boolean backstate = new ImageSave().saveBitmap(project, workName, workCode, radioGroup, this, mBitmap);
-                if (backstate) {
-                    radioGroup.setVisibility(View.VISIBLE);
-                    new BottomUI().BottomUIMenu(this.getWindow());
-                    Toast.makeText(this, R.string.save_success, Toast.LENGTH_SHORT).show();
-                } else {
-                    radioGroup.setVisibility(View.VISIBLE);
-                    new BottomUI().BottomUIMenu(this.getWindow());
-                    Toast.makeText(this, R.string.save_faile, Toast.LENGTH_SHORT).show();
+                if (toast != null) {
+                    toast.cancel();
                 }
+                new BottomUI().hideBottomUIMenu(this.getWindow());
+                if (mMediaProjection != null) {
+                    setUpVirtualDisplay();
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            startCapture();
+                        }
+                    }, 200);
+                }
+
+
+//                radioGroup.setVisibility(View.GONE);
+//                new BottomUI().hideBottomUIMenu(this.getWindow());
+//                View imageView = view.getRootView();
+//                imageView.setDrawingCacheEnabled(true);
+//                imageView.buildDrawingCache();
+//                Bitmap mBitmap = imageView.getDrawingCache();
+//                boolean backstate = new ImageSave().saveBitmap(project, workName, workCode, radioGroup, this, mBitmap);
+//                if (backstate) {
+//                    radioGroup.setVisibility(View.VISIBLE);
+//                    new BottomUI().BottomUIMenu(this.getWindow());
+//                    Toast.makeText(this, R.string.save_success, Toast.LENGTH_SHORT).show();
+//                } else {
+//                    radioGroup.setVisibility(View.VISIBLE);
+//                    new BottomUI().BottomUIMenu(this.getWindow());
+//                    Toast.makeText(this, R.string.save_faile, Toast.LENGTH_SHORT).show();
+//                }
                 break;
             case R.id.rbSound:
                 if (EasyPermissions.hasPermissions(this, PERMS)) {
@@ -204,6 +246,56 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
             case R.id.rbRefresh:
                 ShowDialog("/etc/init.d/mjpg-streamer restart");
                 break;
+        }
+    }
+
+    private void setUpVirtualDisplay() {
+        mVirtualDisplay = mMediaProjection.createVirtualDisplay("ScreenCapture",
+                mWindowWidth, mWindowHeight, mScreenDensity,
+                DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+                mImageReader.getSurface(), null, null);
+    }
+
+    private void startCapture() {
+        Image image = mImageReader.acquireLatestImage();
+        if (image == null) {
+            Log.e("MainActivity", "image is null.");
+            return;
+        }
+        int width = image.getWidth();
+        int height = image.getHeight();
+        final Image.Plane[] planes = image.getPlanes();
+        final ByteBuffer buffer = planes[0].getBuffer();
+        int pixelStride = planes[0].getPixelStride();
+        int rowStride = planes[0].getRowStride();
+        int rowPadding = rowStride - pixelStride * width;
+        Bitmap mBitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888);
+        mBitmap.copyPixelsFromBuffer(buffer);
+        mBitmap = Bitmap.createBitmap(mBitmap, 0, 0, width, height);
+        image.close();
+        stopScreenCapture();
+        if (mBitmap != null) {
+            boolean backstate = new ImageSave().saveBitmap(project, workName, workCode, radioGroup, this, mBitmap);
+            if (backstate) {
+                radioGroup.setVisibility(View.VISIBLE);
+                new BottomUI().BottomUIMenu(this.getWindow());
+                toast = Toast.makeText(LocalActivity.this, R.string.save_success, Toast.LENGTH_SHORT);
+                toast.show();
+            } else {
+                radioGroup.setVisibility(View.VISIBLE);
+                new BottomUI().BottomUIMenu(this.getWindow());
+                toast = Toast.makeText(LocalActivity.this, R.string.save_faile, Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        } else {
+            System.out.println("bitmap is NULL!");
+        }
+    }
+
+    private void stopScreenCapture() {
+        if (mVirtualDisplay != null) {
+            mVirtualDisplay.release();
+            mVirtualDisplay = null;
         }
     }
 
@@ -333,13 +425,12 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
 
     /**
      * 重启服务刷新视频
-     *
      * @param data1
      */
     private void ShowDialog(String data1) {
         try {
             String address = new getIp().getConnectIp();
-            ProgressDialogUtil.startLoad(this,"重启中");
+            ProgressDialogUtil.startLoad(this, "重启中");
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -369,8 +460,8 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
             case Constant.TAG_ONE:
                 if (resultCode == Activity.RESULT_OK) {
                     mMediaProjection = mMediaProjectionManager.getMediaProjection(resultCode, backdata);
-                    new TirenSet().checkTirem(ivTimer);
-                    startCapturing(mMediaProjection);
+//                    new TirenSet().checkTirem(ivTimer);
+//                    startCapturing(mMediaProjection);
                 } else {
                     finish();
                 }
