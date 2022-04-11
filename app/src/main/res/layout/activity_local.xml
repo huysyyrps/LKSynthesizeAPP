@@ -34,7 +34,7 @@
             android:id="@+id/rbSound"
             style="@style/MainRadionButton"
             android:background="@drawable/button_select"
-            android:drawableLeft="@drawable/ic_video" />
+            android:drawableLeft="@drawable/ic_video1" />
 
         <RadioButton
             android:id="@+id/rbAlbum"
