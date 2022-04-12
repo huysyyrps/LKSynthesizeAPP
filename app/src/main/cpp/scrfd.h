@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <vector>
 #include <iostream>
+#include "CallJava.h"
 
 #define YOLOV5_V60 0 //YOLOv5 v6.0
 
@@ -33,6 +34,7 @@ public:
     Yolov5();
     ~Yolov5();
 private:
+    CallJava *callJava = NULL;
     float intersection_area(const Object& a, const Object& b);
     void qsort_descent_inplace(std::vector<Object>& faceobjects, int left, int right);
     void qsort_descent_inplace(std::vector<Object>& faceobjects);
@@ -42,7 +44,7 @@ private:
 
 public:
     int detect_yolov5(const cv::Mat& image, std::vector<Object> &objects);
-    int draw_objects(cv::Mat& image, const std::vector<Object>& objects);
+    int draw_objects(cv::Mat& image, const std::vector<Object>& objects, CallJava *callJava);
     int init_model(const char* param_file, const char* bin_file);
     int load(AAssetManager* mgr, const char* modeltype, bool use_gpu = false);
 
@@ -51,7 +53,7 @@ private:
 
     bool has_kps;
     const int m_target_size = 640;
-    const float m_prob_threshold = 0.25f;
+    const float m_prob_threshold = 0.75f;
     const float m_nms_threshold = 0.45f;
 };
 #endif //NDKCAMERA_H

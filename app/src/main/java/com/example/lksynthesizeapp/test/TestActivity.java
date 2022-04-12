@@ -12,6 +12,7 @@ import android.media.ImageReader;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -119,48 +120,66 @@ public class TestActivity extends AppCompatActivity implements EasyPermissions.P
     }
 
     private void getBuffer() {
-        if (null != mVirtualDisplay && null != mImageReader) {
-            //当画面没有差异时不会返回数据
-            try {
-                image = mImageReader.acquireLatestImage();
-            } catch (UnsupportedOperationException e){
-                //TODO 终止线程并反馈错误
-                //MX3 NB！
+        ImageReader.OnImageAvailableListener readerListener = new ImageReader.OnImageAvailableListener() {
+            @Override
+            public void onImageAvailable(ImageReader reader) {
+                Image image = null;
+                try {
+                    image = reader.acquireLatestImage();
+                    ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+                    byte[] bytes = new byte[buffer.capacity()];
+                    buffer.get(bytes);
+                } finally {
+                    if (image != null) {
+                        image.close();
+                    }
+                }
             }
-
-//            if (null == image){
-//                continue;
+        };
+//        readerListener.onImageAvailable(mImageReader) = ;
+        if (null != mVirtualDisplay && null != mImageReader) {
+            mImageReader.setOnImageAvailableListener(readerListener,new Handler());
+//            //当画面没有差异时不会返回数据
+//            try {
+//                image = mImageReader.acquireLatestImage();
+//            } catch (UnsupportedOperationException e){
+//                //TODO 终止线程并反馈错误
+//                //MX3 NB！
 //            }
-
-            //提取数据
-            int width = image.getWidth();
-            int height = image.getHeight();
-            Image.Plane[] planes = image.getPlanes();
-//            if (null == planes || planes.length <= 0 || null == planes[0]) {
-//                image.close();
-//                continue;
-//            }
-
-            ByteBuffer buffer = planes[0].getBuffer();
-//            if (null == buffer){
-//                image.close();
-//                continue;
-//            }
-
-            //在ByteBuffer存放的数据存在像素间隔，如果不做考虑画面会不全
-            int pixelStride = planes[0].getPixelStride();
-            int rowStride = planes[0].getRowStride();
-            int newWidth = width + ((rowStride - pixelStride * width) / pixelStride);
-
-            //转码容器
-            byte[] yuv = new byte[width * height * 3 >> 1 ];
-
-//            //将rgb转为YUV420，此处做了一次裁剪，裁掉ByteBuffer中像素间隔中的数据
-//            Convert.ABGRToI420Clip(buffer, newWidth, height, yuvWidth, yuvHeight, yuv);
-
-            //TODO 转发给编码线程
-
-            image.close();
+//
+////            if (null == image){
+////                continue;
+////            }
+//
+//            //提取数据
+//            int width = image.getWidth();
+//            int height = image.getHeight();
+//            Image.Plane[] planes = image.getPlanes();
+////            if (null == planes || planes.length <= 0 || null == planes[0]) {
+////                image.close();
+////                continue;
+////            }
+//
+//            ByteBuffer buffer = planes[0].getBuffer();
+////            if (null == buffer){
+////                image.close();
+////                continue;
+////            }
+//
+//            //在ByteBuffer存放的数据存在像素间隔，如果不做考虑画面会不全
+//            int pixelStride = planes[0].getPixelStride();
+//            int rowStride = planes[0].getRowStride();
+//            int newWidth = width + ((rowStride - pixelStride * width) / pixelStride);
+//
+//            //转码容器
+//            byte[] yuv = new byte[width * height * 3 >> 1 ];
+//
+////            //将rgb转为YUV420，此处做了一次裁剪，裁掉ByteBuffer中像素间隔中的数据
+////            Convert.ABGRToI420Clip(buffer, newWidth, height, yuvWidth, yuvHeight, yuv);
+//
+//            //TODO 转发给编码线程
+//
+//            image.close();
         }
     }
 }

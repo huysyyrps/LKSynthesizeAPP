@@ -15,23 +15,22 @@
 #include <android/asset_manager_jni.h>
 #include <android/native_window_jni.h>
 #include <android/native_window.h>
-
 #include <android/log.h>
-
 #include <jni.h>
-
 #include <string>
 #include <vector>
-
 #include <platform.h>
 #include <benchmark.h>
-
 #include "scrfd.h"
-
 #include "ndkcamera.h"
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+//#include "CallJava.h"
+
+CallJava *callJava = NULL;
+JavaVM *jvm = NULL;
+pthread_t childThread;
 
 #if __ARM_NEON
 #include <arm_neon.h>
@@ -56,59 +55,6 @@ static int draw_unsupported(cv::Mat& rgb)
     return 0;
 }
 
-static int draw_fps(cv::Mat& rgb)
-{
-    // resolve moving average
-    float avg_fps = 0.f;
-    {
-        static double t0 = 0.f;
-        static float fps_history[10] = {0.f};
-
-        double t1 = ncnn::get_current_time();
-        if (t0 == 0.f)
-        {
-            t0 = t1;
-            return 0;
-        }
-
-        float fps = 1000.f / (t1 - t0);
-        t0 = t1;
-
-        for (int i = 9; i >= 1; i--)
-        {
-            fps_history[i] = fps_history[i - 1];
-        }
-        fps_history[0] = fps;
-
-        if (fps_history[9] == 0.f)
-        {
-            return 0;
-        }
-
-        for (int i = 0; i < 10; i++)
-        {
-            avg_fps += fps_history[i];
-        }
-        avg_fps /= 10.f;
-    }
-
-    char text[32];
-    sprintf(text, "FPS=%.2f", avg_fps);
-
-    int baseLine = 0;
-    cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
-
-    int y = 0;
-    int x = rgb.cols - label_size.width;
-
-    cv::rectangle(rgb, cv::Rect(cv::Point(x, y), cv::Size(label_size.width, label_size.height + baseLine)),
-                    cv::Scalar(255, 255, 255), -1);
-
-    cv::putText(rgb, text, cv::Point(x, y + label_size.height),
-                cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
-
-    return 0;
-}
 
 static Yolov5* g_scrfd = 0;
 static ncnn::Mutex nlock;
@@ -127,15 +73,13 @@ void MyNdkCamera::on_image_render(cv::Mat& rgb) const
         if (g_scrfd){
             std::vector<Object> faceobjects;
             g_scrfd->detect_yolov5(rgb, faceobjects);
-
-            g_scrfd->draw_objects(rgb, faceobjects);
+            g_scrfd->draw_objects(rgb, faceobjects, callJava);
         }
-        else
-        {
-            draw_unsupported(rgb);
-        }
+//        else
+//        {
+//            draw_unsupported(rgb);
+//        }
     }
-    draw_fps(rgb);
 }
 
 static MyNdkCamera* g_camera = 0;
@@ -145,10 +89,13 @@ extern "C" {
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
     __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "JNI_OnLoad");
-
+    JNIEnv *env;
+    jvm = vm;
+    if (vm->GetEnv((void **) &env, JNI_VERSION_1_6) != JNI_OK) {
+        return -1;
+    }
     g_camera = new MyNdkCamera;
-
-    return JNI_VERSION_1_4;
+    return JNI_VERSION_1_6;
 }
 
 JNIEXPORT void JNI_OnUnload(JavaVM* vm, void* reserved)
@@ -156,6 +103,7 @@ JNIEXPORT void JNI_OnUnload(JavaVM* vm, void* reserved)
     __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "JNI_OnUnload");
 
     {
+        jvm = NULL;
         ncnn::MutexLockGuard g(nlock);
 
         delete g_scrfd;
@@ -241,4 +189,13 @@ JNIEXPORT jboolean JNICALL Java_com_example_lksynthesizeapp_SCRFDNcnn_setOutputW
 
     return JNI_TRUE;
 }
+
+// public native boolean setOutputWindow(Surface surface);
+JNIEXPORT jboolean JNICALL Java_com_example_lksynthesizeapp_SCRFDNcnn_callJavaBack(JNIEnv* env, jobject thiz)
+{
+    if(!callJava)
+        callJava = new CallJava(env, jvm, env->NewGlobalRef(thiz));
+    return JNI_TRUE;
+}
+
 }

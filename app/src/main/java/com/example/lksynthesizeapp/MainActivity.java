@@ -1,9 +1,5 @@
 package com.example.lksynthesizeapp;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
@@ -16,6 +12,10 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.Spinner;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback {
     public static final int REQUEST_CAMERA = 100;
@@ -106,13 +106,17 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA);
         }
-
         scrfdncnn.openCamera(facing);
+        scrfdncnn.callJavaBack();
     }
 
     @Override
     public void onPause() {
         super.onPause();
         scrfdncnn.closeCamera();
+    }
+
+    public void messageMe(String s){
+        Log.e("XXXXXX",s+"11");
     }
 }

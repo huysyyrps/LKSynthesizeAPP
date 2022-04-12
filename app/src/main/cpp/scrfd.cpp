@@ -1,7 +1,7 @@
+#include <opencv2/core/core_c.h>
 #include "scrfd.h"
 
 #include "cpu.h"
-
 #if YOLOV5_V60
 #define MAX_STRIDE 64
 #else
@@ -405,8 +405,9 @@ int Yolov5::detect_yolov5(const cv::Mat &image, std::vector<Object> &objects) {
     return 0;
 }
 
-int Yolov5::draw_objects(cv::Mat &image, const std::vector<Object> &objects) {
+int Yolov5::draw_objects(cv::Mat &image, const std::vector<Object> &objects, CallJava *callJava) {
     // objects to Obj[]
+    this->callJava = callJava;
     static const char *class_names[] = {
             "Circulardefect", "crack"
     };
@@ -439,6 +440,29 @@ int Yolov5::draw_objects(cv::Mat &image, const std::vector<Object> &objects) {
         cv::putText(image, text, cv::Point(x, y + label_size.height),
                     cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
     }
+    if (objects.size()!=0){
+        callJava->callJava1(false, 51);
+    }
+//    JNIEnv *jniEnv = callJava->jenv;
+//    jobject jobj = callJava->jobj;
+//    jclass clazz = callJava->jcs;
+//    jclass clazz = callJava->jcs;
+//    jmethodID jmid = jniEnv->GetMethodID(clazz,"messageMe", "(Ljava/lang/String;)V");
+//    jstring js = jniEnv->NewStringUTF("123");
+//    jniEnv->CallVoidMethod(obj,jmid,js);
+//    jniEnv->DeleteLocalRef(js);
+
+
+//    jclass jclz = callJava->jcs;
+//    jmethodID jmethod = callJava->jmid;
+//    char *msg = "Msg From C++ Thread";
+//    jstring jmsg = jniEnv->NewStringUTF(msg);
+//    //3. 调用函数
+//    jniEnv->CallVoidMethod(jobj, jmethod, jmsg);
+//    jniEnv->DeleteLocalRef(jmsg);
+
+//    callJava->callJava1(false, 51);
+
 
     return 0;
 }
