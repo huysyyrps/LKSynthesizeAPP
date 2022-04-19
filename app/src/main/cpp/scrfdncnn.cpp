@@ -23,7 +23,6 @@
 #include <benchmark.h>
 #include "scrfd.h"
 #include "ndkcamera.h"
-
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 //#include "CallJava.h"
@@ -94,6 +93,8 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved)
     if (vm->GetEnv((void **) &env, JNI_VERSION_1_6) != JNI_OK) {
         return -1;
     }
+if(!callJava)
+    callJava = new CallJava(env, jvm, thiz);
     g_camera = new MyNdkCamera;
     return JNI_VERSION_1_6;
 }
@@ -194,7 +195,7 @@ JNIEXPORT jboolean JNICALL Java_com_example_lksynthesizeapp_SCRFDNcnn_setOutputW
 JNIEXPORT jboolean JNICALL Java_com_example_lksynthesizeapp_SCRFDNcnn_callJavaBack(JNIEnv* env, jobject thiz)
 {
     if(!callJava)
-        callJava = new CallJava(env, jvm, env->NewGlobalRef(thiz));
+        callJava = new CallJava(env, jvm, thiz);
     return JNI_TRUE;
 }
 

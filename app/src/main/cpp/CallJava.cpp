@@ -9,7 +9,7 @@ CallJava::CallJava(JNIEnv *jniEnv, JavaVM *javaVM, jobject obj) {
     jenv  = jniEnv;
     jvm  = javaVM;
     //设置为全局
-    jobj = obj;
+    jobj = jniEnv->GetObjectClass(jobj);
 //    jcs = jniEnv->GetObjectClass(jobj);
     jcs = jenv->FindClass("com/example/lksynthesizeapp/MainActivity");
     jmid = jniEnv->GetMethodID(jcs, "messageMe", "(Ljava/lang/String;)V");

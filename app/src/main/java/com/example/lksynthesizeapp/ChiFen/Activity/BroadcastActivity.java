@@ -174,7 +174,8 @@ public class BroadcastActivity extends BaseActivity {
             engine.startPublishingStream(publishStreamID);
             SharePreferencesUtils sharePreferencesUtils = new SharePreferencesUtils();
             String cid = sharePreferencesUtils.getString(this, "cid", "");
-            engine.addPublishCdnUrl(publishStreamID, "rtmp://221.2.36.238:2012/live/live1/"+cid, new IZegoPublisherUpdateCdnUrlCallback() {
+            //rtmp://221.2.36.238:2012/live/live1/"+cid
+            engine.addPublishCdnUrl(publishStreamID, "rtmp://live-push.bilivideo.com/live-bvc/", new IZegoPublisherUpdateCdnUrlCallback() {
                 @Override
                 public void onPublisherUpdateCdnUrlResult(int errorCode) {
                     if (errorCode == 0){

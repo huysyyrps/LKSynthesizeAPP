@@ -90,4 +90,7 @@ dependencies {
     implementation 'com.getui:gtsdk:3.2.9.0'
     //个推核心组件
     implementation 'com.getui:gtc:3.1.7.0'
+    implementation 'net.butterflytv.utils:rtmp-client:3.1.0'
+    //测试rtmp播放器
+    implementation 'com.github.fanhua1994:FastVideoPlayer:1.0.6'
 }

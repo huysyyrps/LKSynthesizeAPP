@@ -72,7 +72,7 @@ public class CircleTextProgressbar extends TextView {
     /**
      * 进度倒计时时间。
      */
-    private long timeMillis = 2500;
+    private long timeMillis = 2000;
 
     /**
      * View的显示区域。

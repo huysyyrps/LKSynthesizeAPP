@@ -13,7 +13,6 @@ import com.example.lksynthesizeapp.View.StatusBarUtils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 public class WelcomeActivity extends AppCompatActivity {
 
@@ -36,7 +35,7 @@ public class WelcomeActivity extends AppCompatActivity {
                 startActivity(intent);
                 finish();
             }
-        }, 2500); //延迟3.5秒跳转
+        }, 2000); //延迟3.5秒跳转
 
         // 模拟网易新闻跳过。
         tvProgress = (CircleTextProgressbar) findViewById(R.id.tvProgress);
@@ -47,10 +46,4 @@ public class WelcomeActivity extends AppCompatActivity {
         tvProgress.reStart();
     }
 
-    @OnClick(R.id.tvProgress)
-    public void onClick() {
-        Intent intent=new Intent(WelcomeActivity.this, DefinedActivity.class);
-        startActivity(intent);
-        finish();
-    }
 }
