@@ -226,7 +226,7 @@ Java_com_example_lksynthesizeapp_ChiFen_MediaCodec_ScreenLive_connect(JNIEnv *en
 }
 
 extern "C"
-JNIEXPORT void JNICALL
+JNIEXPORT jboolean JNICALL
 Java_com_example_lksynthesizeapp_ChiFen_MediaCodec_ScreenLive_disConnect(JNIEnv *env, jobject thiz) {
 
     if (live){
@@ -243,6 +243,7 @@ Java_com_example_lksynthesizeapp_ChiFen_MediaCodec_ScreenLive_disConnect(JNIEnv 
         free(live);
         live = nullptr;
     }
+    return JNI_TRUE;
 }
 
 extern "C"

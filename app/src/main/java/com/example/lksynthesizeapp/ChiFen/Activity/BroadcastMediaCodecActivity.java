@@ -16,9 +16,11 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.lksynthesizeapp.ChiFen.Base.BottomUI;
 import com.example.lksynthesizeapp.ChiFen.MediaCodec.ScreenLive;
 import com.example.lksynthesizeapp.ChiFen.View.MyWebView;
 import com.example.lksynthesizeapp.Constant.Net.getIp;
@@ -61,6 +63,8 @@ public class BroadcastMediaCodecActivity extends AppCompatActivity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         // 设置全屏
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        //隐藏底部按钮
+        new BottomUI().hideBottomUIMenu(this.getWindow());
 
         Intent intent = getIntent();
         project = intent.getStringExtra("project");
@@ -84,14 +88,18 @@ public class BroadcastMediaCodecActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        address = "http://" + address + ":8080";
-        Log.e("XXXXX", address);
-        myWebView.setBackgroundColor(Color.BLACK);
-        myWebView.loadUrl(address);
+        if (address==null){
+            Toast.makeText(this, "为获取到设备IP,请重启设备和手机热点", Toast.LENGTH_SHORT).show();
+        }else {
+            address = "http://" + address + ":8080";
+            Log.e("XXXXX", address);
+            myWebView.setBackgroundColor(Color.BLACK);
+            myWebView.loadUrl(address);
 
-        mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-        Intent captureIntent = mediaProjectionManager.createScreenCaptureIntent();
-        startActivityForResult(captureIntent, 100);
+            mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+            Intent captureIntent = mediaProjectionManager.createScreenCaptureIntent();
+            startActivityForResult(captureIntent, 100);
+        }
     }
 
     public boolean checkPermission() {

@@ -74,6 +74,8 @@ public class BroadcastActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ButterKnife.bind(this);
+        //隐藏底部按钮
+        new BottomUI().hideBottomUIMenu(this.getWindow());
         //不息屏
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         // 设置全屏

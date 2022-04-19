@@ -16,6 +16,7 @@ public class ScreenLive extends Thread {
     private LinkedBlockingQueue<RTMPPackage> queue = new LinkedBlockingQueue<>();
     private String url;
     private MediaProjection mediaProjection;
+    VideoCodec videoCodec;
 
 
     public void startLive(String url, MediaProjection mediaProjection) {
@@ -33,6 +34,9 @@ public class ScreenLive extends Thread {
     }
 
     public void stopLive() {
+        isLiving = false;
+        videoCodec.stopLive();
+        queue.clear();
         disConnect();
     }
 
@@ -45,7 +49,7 @@ public class ScreenLive extends Thread {
             return;
         }
 
-        VideoCodec videoCodec = new VideoCodec(this);
+        videoCodec = new VideoCodec(this);
         videoCodec.startLive(mediaProjection);
 
 //        AudioCodec audioCodec = new AudioCodec(this);
