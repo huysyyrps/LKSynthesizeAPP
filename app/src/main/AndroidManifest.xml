@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.lksynthesizeapp">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -45,7 +46,6 @@
         android:supportsRtl="true"
         android:theme="@style/NoAction"
         android:usesCleartextTraffic="true">
-        <!-- //个推SDK个推SDK的appid -->
         <meta-data
             android:name="PUSH_APPID"
             android:value="iinLTplUFn7b8Zy2dl8755" /> <!-- 接收来自个推的消息 -->
@@ -54,17 +54,17 @@
         <activity
             android:name=".Constant.activity.WelcomeActivity"
             android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+             <intent-filter>
+             <action android:name="android.intent.action.MAIN" />
+
+
+             <category android:name="android.intent.category.LAUNCHER" />
+             </intent-filter>
         </activity>
         <activity
             android:name=".MainActivity"
-            android:exported="true">
-
-        </activity>
+            android:exported="true" />
         <activity android:name=".Constant.activity.DefinedActivity" />
         <activity android:name=".Constant.activity.SendSelectActivity" />
         <activity

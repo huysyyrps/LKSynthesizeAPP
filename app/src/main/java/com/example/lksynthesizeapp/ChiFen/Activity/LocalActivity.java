@@ -244,7 +244,8 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
                 new MainUI().showPopupMenu(rbAlbum, this);
                 break;
             case R.id.rbRefresh:
-                ShowDialog("/etc/init.d/mjpg-streamer restart");
+//                ShowDialog("/etc/init.d/mjpg-streamer restart");
+                ShowDialog("uci set mjpg-streamer.core.fps=20", "uci commit", "/etc/init.d/mjpg-streamer restart");
                 break;
         }
     }
@@ -438,6 +439,54 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
                         @Override
                         public void confirm(String data) {
                             handlerSetting.sendEmptyMessage(Constant.TAG_ONE);
+                        }
+
+                        @Override
+                        public void error(String s) {
+                            toastData = s;
+                            handlerSetting.sendEmptyMessage(Constant.TAG_TWO);
+                        }
+                    });
+                }
+            }).start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void ShowDialog(String data1, String data2, String data3) {
+        try {
+            String address = new getIp().getConnectIp();
+            ProgressDialogUtil.startLoad(this, "重启中");
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    SSHExcuteCommandHelper.writeBefor(address, data1, new SSHCallBack() {
+                        @Override
+                        public void confirm(String data) {
+                            SSHExcuteCommandHelper.writeBefor(address, data2, new SSHCallBack() {
+                                @Override
+                                public void confirm(String data) {
+                                    SSHExcuteCommandHelper.writeBefor(address, data3, new SSHCallBack() {
+                                        @Override
+                                        public void confirm(String data) {
+                                            handlerSetting.sendEmptyMessage(Constant.TAG_ONE);
+                                        }
+
+                                        @Override
+                                        public void error(String s) {
+                                            toastData = s;
+                                            handlerSetting.sendEmptyMessage(Constant.TAG_TWO);
+                                        }
+                                    });
+                                }
+
+                                @Override
+                                public void error(String s) {
+                                    toastData = s;
+                                    handlerSetting.sendEmptyMessage(Constant.TAG_TWO);
+                                }
+                            });
                         }
 
                         @Override

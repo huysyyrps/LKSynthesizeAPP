@@ -30,6 +30,8 @@ project("rtmtscreenlive")
 # Gradle automatically packages shared libraries with your APK.
 
 add_subdirectory(librtmp)
+#add_subdirectory(opencv-mobile-4.5.4-android)
+#add_subdirectory(ncnn-20211208-android-vulkan)
 
 add_library( # Sets the name of the library.
         native-lib
@@ -38,7 +40,12 @@ add_library( # Sets the name of the library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        native-lib.cpp )
+        native-lib.cpp
+#        scrfdncnn.cpp
+#        scrfd.cpp
+#        ndkcamera.cpp
+#        CallJava.cpp
+        )
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by

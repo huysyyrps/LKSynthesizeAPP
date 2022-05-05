@@ -38,6 +38,7 @@ public class ScreenLive extends Thread {
         videoCodec.stopLive();
         queue.clear();
         disConnect();
+        videoCodec.stopLive();
     }
 
 

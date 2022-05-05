@@ -93,4 +93,7 @@ dependencies {
     implementation 'net.butterflytv.utils:rtmp-client:3.1.0'
     //测试rtmp播放器
     implementation 'com.github.fanhua1994:FastVideoPlayer:1.0.6'
+
+    implementation 'com.github.wseemann:FFmpegMediaMetadataRetriever-core:1.0.16'
+    implementation 'com.github.wseemann:FFmpegMediaMetadataRetriever-native:1.0.16'
 }

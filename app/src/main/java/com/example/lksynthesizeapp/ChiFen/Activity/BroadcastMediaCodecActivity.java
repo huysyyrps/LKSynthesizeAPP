@@ -83,6 +83,7 @@ public class BroadcastMediaCodecActivity extends AppCompatActivity {
             tvWorkCode.setText(workCode);
         }
         frameLayout.setBackgroundColor(getResources().getColor(R.color.black));
+        myWebView.setBackgroundColor(getResources().getColor(R.color.black));
         try {
             address = new getIp().getConnectIp();
         } catch (Exception e) {
@@ -90,6 +91,9 @@ public class BroadcastMediaCodecActivity extends AppCompatActivity {
         }
         if (address==null){
             Toast.makeText(this, "为获取到设备IP,请重启设备和手机热点", Toast.LENGTH_SHORT).show();
+            mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+            Intent captureIntent = mediaProjectionManager.createScreenCaptureIntent();
+            startActivityForResult(captureIntent, 100);
         }else {
             address = "http://" + address + ":8080";
             Log.e("XXXXX", address);
