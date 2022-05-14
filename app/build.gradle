@@ -24,6 +24,9 @@ android {
                 //后续所有产品的 APPID 均统一配置为 GETUI_APPID 占位符
                 GETUI_APPID       : "iinLTplUFn7b8Zy2dl8755",
         ]
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a"
+        }
     }
 
     buildTypes {
@@ -42,6 +45,11 @@ android {
             version '3.18.1'
         }
     }
+//    ndk {
+//        abiFilters 'armeabi-v7a'// , 'arm64-v8a' //,'x86', 'x86_64', 'armeabi'
+//        stl "gnustl_static"
+//    }
+
     buildFeatures {
         viewBinding true
     }

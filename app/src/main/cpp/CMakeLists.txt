@@ -33,19 +33,7 @@ add_subdirectory(librtmp)
 #add_subdirectory(opencv-mobile-4.5.4-android)
 #add_subdirectory(ncnn-20211208-android-vulkan)
 
-add_library( # Sets the name of the library.
-        native-lib
-
-        # Sets the library as a shared library.
-        SHARED
-
-        # Provides a relative path to your source file(s).
-        native-lib.cpp
-#        scrfdncnn.cpp
-#        scrfd.cpp
-#        ndkcamera.cpp
-#        CallJava.cpp
-        )
+add_library(native-lib SHARED native-lib.cpp)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by

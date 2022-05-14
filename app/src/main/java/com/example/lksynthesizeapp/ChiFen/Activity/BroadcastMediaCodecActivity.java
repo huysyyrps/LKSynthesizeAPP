@@ -32,8 +32,8 @@ import butterknife.ButterKnife;
 
 public class BroadcastMediaCodecActivity extends AppCompatActivity {
     //    String url = "rtmp://172.16.16.35:1935/livehime";//rtmp://172.16.16.239:1935/livehime
-//    String url = "rtmp://221.2.36.238:2012/live/live1";
-    String url = "rtmp://221.2.36.238:2012/live/live1";
+    String url = "rtmp://221.2.36.238:2012/live/live1";//address = "172.16.16.85";
+//    String url = "rtmp://172.16.16.85:1935/live/live1";
     private MediaProjectionManager mediaProjectionManager;
     private MediaProjection mediaProjection;
     private ScreenLive screenLive;
@@ -129,6 +129,7 @@ public class BroadcastMediaCodecActivity extends AppCompatActivity {
             screenLive = new ScreenLive();
             String cid = new SharePreferencesUtils().getString(this,"cid","");
             url = url+"/"+cid;
+            Log.e("XXXXX",url);
             screenLive.startLive(url, mediaProjection);
         }
     }

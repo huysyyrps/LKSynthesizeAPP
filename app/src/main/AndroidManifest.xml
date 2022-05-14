@@ -51,6 +51,13 @@
             android:value="iinLTplUFn7b8Zy2dl8755" /> <!-- 接收来自个推的消息 -->
         <service android:name=".ChiFen.DemoIntentService" />
 
+        <activity android:name=".MainActivity">
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+        </activity>
+
         <activity
             android:name=".Constant.activity.WelcomeActivity"
             android:exported="true">
@@ -62,9 +69,6 @@
              <category android:name="android.intent.category.LAUNCHER" />
              </intent-filter>
         </activity>
-        <activity
-            android:name=".MainActivity"
-            android:exported="true" />
         <activity android:name=".Constant.activity.DefinedActivity" />
         <activity android:name=".Constant.activity.SendSelectActivity" />
         <activity
