@@ -13,10 +13,14 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        externalNativeBuild {
-            cmake {
-                cppFlags '-std=c++11'
-            }
+//        externalNativeBuild {
+//            cmake {
+//                cppFlags '-std=c++11'
+//            }
+//        }
+        ndk {
+            moduleName "ncnn"
+            abiFilters "armeabi-v7a", "arm64-v8a"
         }
         //个推
         manifestPlaceholders = [
@@ -24,9 +28,6 @@ android {
                 //后续所有产品的 APPID 均统一配置为 GETUI_APPID 占位符
                 GETUI_APPID       : "iinLTplUFn7b8Zy2dl8755",
         ]
-        ndk {
-            abiFilters "armeabi-v7a", "arm64-v8a"
-        }
     }
 
     buildTypes {
@@ -35,20 +36,17 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
+//    compileOptions {
+//        sourceCompatibility JavaVersion.VERSION_1_8
+//        targetCompatibility JavaVersion.VERSION_1_8
+//    }
     externalNativeBuild {
         cmake {
-            path file('src/main/cpp/CMakeLists.txt')
+//            path file('src/main/cpp/CMakeLists.txt')
+            path file('src/main/jni/CMakeLists.txt')
             version '3.18.1'
         }
     }
-//    ndk {
-//        abiFilters 'armeabi-v7a'// , 'arm64-v8a' //,'x86', 'x86_64', 'armeabi'
-//        stl "gnustl_static"
-//    }
 
     buildFeatures {
         viewBinding true

@@ -22,6 +22,7 @@
     <string name="updata_found">上传方式</string>
     <string name="updata_local">本地存储</string>
     <string name="updata_socket">实时上传</string>
+    <string name="line_discern">在线检测</string>
     <string name="setting">参数设置</string>
     <string name="save_success">保存成功</string>
     <string name="save_faile">保存失败</string>

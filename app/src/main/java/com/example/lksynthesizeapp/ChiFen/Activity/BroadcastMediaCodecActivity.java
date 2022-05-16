@@ -56,15 +56,15 @@ public class BroadcastMediaCodecActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_broadcast_mediacodec);
-        ButterKnife.bind(this);
-        checkPermission();
         //不息屏
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         // 设置全屏
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         //隐藏底部按钮
         new BottomUI().hideBottomUIMenu(this.getWindow());
+        setContentView(R.layout.activity_broadcast_mediacodec);
+        ButterKnife.bind(this);
+        checkPermission();
 
         Intent intent = getIntent();
         project = intent.getStringExtra("project");
@@ -104,6 +104,7 @@ public class BroadcastMediaCodecActivity extends AppCompatActivity {
             Intent captureIntent = mediaProjectionManager.createScreenCaptureIntent();
             startActivityForResult(captureIntent, 100);
         }
+        new BottomUI().hideBottomUIMenu(this.getWindow());
     }
 
     public boolean checkPermission() {
@@ -123,6 +124,7 @@ public class BroadcastMediaCodecActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 100 && resultCode == Activity.RESULT_OK) {
+            new BottomUI().hideBottomUIMenu(this.getWindow());
 //         mediaProjection--->产生录屏数据
             mediaProjection = mediaProjectionManager.getMediaProjection
                     (resultCode, data);

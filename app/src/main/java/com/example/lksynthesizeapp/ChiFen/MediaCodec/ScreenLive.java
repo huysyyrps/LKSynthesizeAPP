@@ -8,7 +8,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class ScreenLive extends Thread {
 
     static {
-        System.loadLibrary("native-lib");
+        System.loadLibrary("yolov5ncnn");
     }
 
     private static final String TAG = "------>dddd<--------";

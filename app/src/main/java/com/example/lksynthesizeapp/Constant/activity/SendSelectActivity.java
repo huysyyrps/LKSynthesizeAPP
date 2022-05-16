@@ -19,6 +19,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.lksynthesizeapp.ChiFen.Activity.BroadcastMediaCodecActivity;
+import com.example.lksynthesizeapp.ChiFen.Activity.DescernActivity;
 import com.example.lksynthesizeapp.ChiFen.Activity.LocalActivity;
 import com.example.lksynthesizeapp.Constant.Base.AlertDialogUtil;
 import com.example.lksynthesizeapp.Constant.Base.DialogCallBack;
@@ -54,6 +55,8 @@ public class SendSelectActivity extends AppCompatActivity {
     LinearLayout linLocak;
     @BindView(R.id.linSocket)
     LinearLayout linSocket;
+    @BindView(R.id.linDiscern)
+    LinearLayout linDiscern;
     //富有动感的Sheet弹窗
     Intent intent;
     private String address = "";
@@ -102,7 +105,7 @@ public class SendSelectActivity extends AppCompatActivity {
         });
     }
 
-    @OnClick({R.id.linLocak, R.id.linSocket})
+    @OnClick({R.id.linLocak, R.id.linSocket, R.id.linDiscern})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.linLocak:
@@ -112,6 +115,10 @@ public class SendSelectActivity extends AppCompatActivity {
             case R.id.linSocket:
                 seSPData();
                 SelectActivity("实时上传");
+                break;
+            case R.id.linDiscern:
+                seSPData();
+                SelectActivity("在线检测");
                 break;
         }
     }
@@ -140,6 +147,13 @@ public class SendSelectActivity extends AppCompatActivity {
             } else if (data.equals("实时上传")) {
                 sharePreferencesUtils.setString(SendSelectActivity.this, "sendSelect", "实时上传");
                 intent = new Intent(SendSelectActivity.this, BroadcastMediaCodecActivity.class);
+                intent.putExtra("project", etProject.getText().toString().trim());
+                intent.putExtra("etWorkName", etWorkName.getText().toString().trim());
+                intent.putExtra("etWorkCode", etWorkCode.getText().toString().trim());
+                startActivity(intent);
+            }else if (data.equals("在线检测")) {
+                sharePreferencesUtils.setString(SendSelectActivity.this, "sendSelect", "实时上传");
+                intent = new Intent(SendSelectActivity.this, DescernActivity.class);
                 intent.putExtra("project", etProject.getText().toString().trim());
                 intent.putExtra("etWorkName", etWorkName.getText().toString().trim());
                 intent.putExtra("etWorkCode", etWorkCode.getText().toString().trim());
