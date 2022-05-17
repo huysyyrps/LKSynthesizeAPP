@@ -7,11 +7,11 @@
     android:id="@+id/frameLayout"
     android:background="@color/black">
 
-    <com.example.lksynthesizeapp.ChiFen.View.MyWebView
-        android:id="@+id/webView"
+    <ImageView
+        android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/linelayout_radion" />
+        android:scaleType="fitXY"/>
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="wrap_content"

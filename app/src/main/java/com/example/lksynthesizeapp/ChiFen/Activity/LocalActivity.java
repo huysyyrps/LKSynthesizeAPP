@@ -7,7 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.graphics.Color;
+import android.graphics.BitmapFactory;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.Image;
@@ -45,7 +45,6 @@ import com.example.lksynthesizeapp.ChiFen.Media.MediaCallBack;
 import com.example.lksynthesizeapp.ChiFen.Media.Notifications;
 import com.example.lksynthesizeapp.ChiFen.Media.ScreenRecorder;
 import com.example.lksynthesizeapp.ChiFen.Media.VideoEncodeConfig;
-import com.example.lksynthesizeapp.ChiFen.View.MyWebView;
 import com.example.lksynthesizeapp.Constant.Base.BaseActivity;
 import com.example.lksynthesizeapp.Constant.Base.Constant;
 import com.example.lksynthesizeapp.Constant.Base.ProgressDialogUtil;
@@ -55,6 +54,9 @@ import com.example.lksynthesizeapp.Constant.Net.getIp;
 import com.example.lksynthesizeapp.R;
 
 import java.io.File;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -64,8 +66,8 @@ import butterknife.OnClick;
 import pub.devrel.easypermissions.EasyPermissions;
 
 public class LocalActivity extends BaseActivity implements EasyPermissions.PermissionCallbacks {
-    @BindView(R.id.webView)
-    MyWebView webView;
+    @BindView(R.id.imageView)
+    ImageView imageView;
     @BindView(R.id.rbCamera)
     RadioButton rbCamera;
     @BindView(R.id.rbSound)
@@ -110,6 +112,10 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
     String[] PERMS = {Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.FOREGROUND_SERVICE};
+    private Thread mythread;
+    URL videoUrl;
+    HttpURLConnection conn;
+    Bitmap bitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,14 +140,45 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
         }
 
 
-        webView.setBackgroundColor(Color.BLACK);
-        webView.getSettings().setJavaScriptEnabled(true);
         try {
             address = new getIp().getConnectIp();
-            address = "http://" + address + ":8080";
-            webView.loadUrl(address);
+            address = "http://" + address + ":8080?action=snapshot";
+            mythread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+                        draw();
+                    }
+                }
+            });
+            mythread.start();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void draw() {
+        // TODO Auto-generated method stub
+        try {
+            InputStream inputstream = null;
+            //创建一个URL对象
+            videoUrl = new URL(address);
+            //利用HttpURLConnection对象从网络中获取网页数据
+            conn = (HttpURLConnection) videoUrl.openConnection();
+            //设置输入流
+            conn.setDoInput(true);
+            //连接
+            conn.connect();
+            //得到网络返回的输入流
+            inputstream = conn.getInputStream();
+            //创建出一个bitmap
+            bitmap = BitmapFactory.decodeStream(inputstream);
+            handlerSetting.sendEmptyMessage(Constant.TAG_THERE);
+            //关闭HttpURLConnection连接
+            conn.disconnect();
+        } catch (Exception ex) {
+            Log.e("XXX", ex.toString());
+        } finally {
         }
     }
 
@@ -527,11 +564,13 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
                     Toast.makeText(LocalActivity.this, "重启成功", Toast.LENGTH_SHORT).show();
                     ProgressDialogUtil.stopLoad();
                     address = "http://" + address + ":8080";
-                    webView.loadUrl(address);
                     break;
                 case Constant.TAG_TWO:
                     Toast.makeText(LocalActivity.this, toastData, Toast.LENGTH_LONG).show();
                     ProgressDialogUtil.stopLoad();
+                    break;
+                case Constant.TAG_THERE:
+                    imageView.setImageBitmap(bitmap);
                     break;
             }
         }

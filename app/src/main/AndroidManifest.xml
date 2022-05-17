@@ -46,11 +46,18 @@
         android:supportsRtl="true"
         android:theme="@style/NoAction"
         android:usesCleartextTraffic="true">
-
         <meta-data
             android:name="PUSH_APPID"
             android:value="iinLTplUFn7b8Zy2dl8755" /> <!-- 接收来自个推的消息 -->
         <service android:name=".ChiFen.DemoIntentService" />
+
+        <activity android:name=".TestActivity">
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+        </activity>
 
         <activity
             android:name=".Constant.activity.WelcomeActivity"
@@ -88,8 +95,7 @@
             android:screenOrientation="landscape" />
         <activity
             android:name=".ChiFen.Activity.DescernActivity"
-            android:screenOrientation="landscape"  >
-        </activity>
+            android:screenOrientation="landscape"></activity>
     </application>
 
 </manifest>

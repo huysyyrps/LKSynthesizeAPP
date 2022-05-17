@@ -635,7 +635,7 @@ JNIEXPORT jobjectArray JNICALL Java_com_example_lksynthesizeapp_YoloV5Ncnn_Detec
         // stride 16
         {
             ncnn::Mat out;
-            ex.extract("781", out);
+            ex.extract("413", out);
 
             ncnn::Mat anchors(6);
             anchors[0] = 30.f;
@@ -654,7 +654,7 @@ JNIEXPORT jobjectArray JNICALL Java_com_example_lksynthesizeapp_YoloV5Ncnn_Detec
         // stride 32
         {
             ncnn::Mat out;
-            ex.extract("801", out);
+            ex.extract("434", out);
 
             ncnn::Mat anchors(6);
             anchors[0] = 116.f;

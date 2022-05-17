@@ -35,10 +35,11 @@ public class ScreenLive extends Thread {
 
     public void stopLive() {
         isLiving = false;
-        videoCodec.stopLive();
         queue.clear();
         disConnect();
-        videoCodec.stopLive();
+        if (videoCodec!=null){
+            videoCodec.stopLive();
+        }
     }
 
 

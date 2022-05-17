@@ -1,15 +1,12 @@
 package com.example.lksynthesizeapp.ChiFen.Activity;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.media.ExifInterface;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
@@ -21,8 +18,6 @@ import com.example.lksynthesizeapp.ChiFen.Base.BottomUI;
 import com.example.lksynthesizeapp.R;
 import com.example.lksynthesizeapp.YoloV5Ncnn;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -133,8 +128,6 @@ public class DescernActivity extends AppCompatActivity {
             //创建出一个bitmap
             bmp = BitmapFactory.decodeStream(inputstream);
 //            bitmap = bmp.copy(Bitmap.Config.ARGB_8888, true);
-            currentTme1 = System.currentTimeMillis();
-            Log.e("XXX",(currentTme1-currentTme)+"");
 //            bitmap = imageScale(bitmap, 364,237);
             YoloV5Ncnn.Obj[] objects = yolov5ncnn.Detect(bmp, false);
             showObjects(objects);
@@ -169,6 +162,8 @@ public class DescernActivity extends AppCompatActivity {
     private void showObjects(YoloV5Ncnn.Obj[] objects) {
         if (objects == null) {
             imageView.setImageBitmap(bmp);
+//            currentTme1 = System.currentTimeMillis();
+//            Log.e("XXX",(currentTme1-currentTme)+"");
             return;
         }
 
@@ -179,7 +174,6 @@ public class DescernActivity extends AppCompatActivity {
         Canvas canvas = new Canvas(rgba);
 
         for (int i = 0; i < objects.length; i++) {
-//            canvas.drawRect(objects[i].x*scanw, objects[i].y*scanh, (objects[i].x + objects[i].w)*scanw, (objects[i].y + objects[i].h)*scanh, paint);
             canvas.drawRect(objects[i].x, objects[i].y, objects[i].x + objects[i].w, objects[i].y + objects[i].h, paint);
 //            // draw filled text inside image
 //            {
@@ -202,80 +196,7 @@ public class DescernActivity extends AppCompatActivity {
             mediaPlayer.start();
         }
         imageView.setImageBitmap(rgba);
+//        currentTme1 = System.currentTimeMillis();
+//        Log.e("XXX",(currentTme1-currentTme)+"");
     }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode == RESULT_OK && null != data) {
-            Uri selectedImage = data.getData();
-
-            try {
-                if (requestCode == SELECT_IMAGE) {
-                    bitmap = decodeUri(selectedImage);
-
-                    yourSelectedImage = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-
-                    imageView.setImageBitmap(bitmap);
-                }
-            } catch (FileNotFoundException e) {
-                Log.e("MainActivity", "FileNotFoundException");
-                return;
-            }
-        }
-    }
-
-    private Bitmap decodeUri(Uri selectedImage) throws FileNotFoundException {
-        // Decode image size
-        BitmapFactory.Options o = new BitmapFactory.Options();
-        o.inJustDecodeBounds = true;
-        BitmapFactory.decodeStream(getContentResolver().openInputStream(selectedImage), null, o);
-
-        // The new size we want to scale to
-        final int REQUIRED_SIZE = 640;
-
-        // Find the correct scale value. It should be the power of 2.
-        int width_tmp = o.outWidth, height_tmp = o.outHeight;
-        int scale = 1;
-        while (true) {
-            if (width_tmp / 2 < REQUIRED_SIZE
-                    || height_tmp / 2 < REQUIRED_SIZE) {
-                break;
-            }
-            width_tmp /= 2;
-            height_tmp /= 2;
-            scale *= 2;
-        }
-
-        // Decode with inSampleSize
-        BitmapFactory.Options o2 = new BitmapFactory.Options();
-        o2.inSampleSize = scale;
-        Bitmap bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(selectedImage), null, o2);
-
-        // Rotate according to EXIF
-        int rotate = 0;
-        try {
-            ExifInterface exif = new ExifInterface(getContentResolver().openInputStream(selectedImage));
-            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-            switch (orientation) {
-                case ExifInterface.ORIENTATION_ROTATE_270:
-                    rotate = 270;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_180:
-                    rotate = 180;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_90:
-                    rotate = 90;
-                    break;
-            }
-        } catch (IOException e) {
-            Log.e("MainActivity", "ExifInterface IOException");
-        }
-
-        Matrix matrix = new Matrix();
-        matrix.postRotate(rotate);
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-    }
-
 }

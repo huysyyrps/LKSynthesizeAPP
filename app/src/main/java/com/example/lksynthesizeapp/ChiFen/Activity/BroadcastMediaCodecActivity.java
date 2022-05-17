@@ -5,15 +5,19 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,10 +26,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.lksynthesizeapp.ChiFen.Base.BottomUI;
 import com.example.lksynthesizeapp.ChiFen.MediaCodec.ScreenLive;
-import com.example.lksynthesizeapp.ChiFen.View.MyWebView;
 import com.example.lksynthesizeapp.Constant.Net.getIp;
 import com.example.lksynthesizeapp.R;
 import com.example.lksynthesizeapp.SharePreferencesUtils;
+
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -50,8 +57,12 @@ public class BroadcastMediaCodecActivity extends AppCompatActivity {
     TextView tvWorkCode;
     @BindView(R.id.linearLayout1)
     LinearLayout linearLayout1;
-    @BindView(R.id.webView)
-    MyWebView myWebView;
+    @BindView(R.id.imageView)
+    ImageView imageView;
+    private Thread mythread;
+    URL videoUrl;
+    HttpURLConnection conn;
+    Bitmap bitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +94,6 @@ public class BroadcastMediaCodecActivity extends AppCompatActivity {
             tvWorkCode.setText(workCode);
         }
         frameLayout.setBackgroundColor(getResources().getColor(R.color.black));
-        myWebView.setBackgroundColor(getResources().getColor(R.color.black));
         try {
             address = new getIp().getConnectIp();
         } catch (Exception e) {
@@ -95,11 +105,17 @@ public class BroadcastMediaCodecActivity extends AppCompatActivity {
             Intent captureIntent = mediaProjectionManager.createScreenCaptureIntent();
             startActivityForResult(captureIntent, 100);
         }else {
-            address = "http://" + address + ":8080";
+            address = "http://" + address + ":8080?action=snapshot";
+            mythread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+                        draw();
+                    }
+                }
+            });
+            mythread.start();
             Log.e("XXXXX", address);
-            myWebView.setBackgroundColor(Color.BLACK);
-            myWebView.loadUrl(address);
-
             mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
             Intent captureIntent = mediaProjectionManager.createScreenCaptureIntent();
             startActivityForResult(captureIntent, 100);
@@ -115,7 +131,6 @@ public class BroadcastMediaCodecActivity extends AppCompatActivity {
                     Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     Manifest.permission.RECORD_AUDIO
             }, 1);
-
         }
         return false;
     }
@@ -126,8 +141,7 @@ public class BroadcastMediaCodecActivity extends AppCompatActivity {
         if (requestCode == 100 && resultCode == Activity.RESULT_OK) {
             new BottomUI().hideBottomUIMenu(this.getWindow());
 //         mediaProjection--->产生录屏数据
-            mediaProjection = mediaProjectionManager.getMediaProjection
-                    (resultCode, data);
+            mediaProjection = mediaProjectionManager.getMediaProjection(resultCode, data);
             screenLive = new ScreenLive();
             String cid = new SharePreferencesUtils().getString(this,"cid","");
             url = url+"/"+cid;
@@ -142,4 +156,38 @@ public class BroadcastMediaCodecActivity extends AppCompatActivity {
         screenLive.stopLive();
     }
 
+    private void draw() {
+        // TODO Auto-generated method stub
+        try {
+            InputStream inputstream = null;
+            //创建一个URL对象
+            videoUrl = new URL(address);
+            //利用HttpURLConnection对象从网络中获取网页数据
+            conn = (HttpURLConnection) videoUrl.openConnection();
+            //设置输入流
+            conn.setDoInput(true);
+            //连接
+            conn.connect();
+            //得到网络返回的输入流
+            inputstream = conn.getInputStream();
+            //创建出一个bitmap
+            bitmap = BitmapFactory.decodeStream(inputstream);
+            Message message = new Message();
+            message.what = 1;
+            handler.sendMessage(message);
+            //关闭HttpURLConnection连接
+            conn.disconnect();
+        } catch (Exception ex) {
+            Log.e("XXX", ex.toString());
+        } finally {
+        }
+    }
+
+    Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            imageView.setImageBitmap(bitmap);
+        }
+    };
 }
