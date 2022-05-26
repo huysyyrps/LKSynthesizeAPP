@@ -146,6 +146,7 @@ public class DefinedActivity extends BaseActivity implements EasyPermissions.Per
         super.onPause();
         remoteView.onPause();
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();

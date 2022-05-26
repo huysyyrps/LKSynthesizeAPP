@@ -597,8 +597,8 @@ JNIEXPORT jobjectArray JNICALL Java_com_example_lksynthesizeapp_YoloV5Ncnn_Detec
     // yolov5
     std::vector<Object> objects;
     {
-        const float prob_threshold = 0.65f;
-        const float nms_threshold = 0.65f;
+        const float prob_threshold = 0.45f;
+        const float nms_threshold = 0.45f;
 
         const float norm_vals[3] = {1 / 255.f, 1 / 255.f, 1 / 255.f};
         in_pad.substract_mean_normalize(0, norm_vals);
@@ -635,7 +635,7 @@ JNIEXPORT jobjectArray JNICALL Java_com_example_lksynthesizeapp_YoloV5Ncnn_Detec
         // stride 16
         {
             ncnn::Mat out;
-            ex.extract("413", out);
+            ex.extract("414", out);
 
             ncnn::Mat anchors(6);
             anchors[0] = 30.f;

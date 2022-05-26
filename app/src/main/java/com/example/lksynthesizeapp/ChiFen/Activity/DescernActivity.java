@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.lksynthesizeapp.ChiFen.Base.BottomUI;
+import com.example.lksynthesizeapp.Constant.Net.getIp;
 import com.example.lksynthesizeapp.R;
 import com.example.lksynthesizeapp.YoloV5Ncnn;
 
@@ -43,6 +44,8 @@ public class DescernActivity extends AppCompatActivity {
     private MediaPlayer mediaPlayer;
     long currentTme = 0;
     long currentTme1 = 0;
+    private String address = "";
+    public boolean runing = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,11 +80,16 @@ public class DescernActivity extends AppCompatActivity {
             Log.e("MainActivity", "yolov5ncnn Init failed");
         }
         imageView = (ImageView) findViewById(R.id.imageView);
-        url = "http://192.168.43.104:8080?action=snapshot";
+        try {
+            address = new getIp().getConnectIp();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        url = "http://"+ address + ":8080?action=snapshot";
         mythread = new Thread(new Runnable() {
             @Override
             public void run() {
-                while (true) {
+                while (runing) {
                     draw();
                     currentTme = System.currentTimeMillis();
                 }
@@ -176,5 +184,12 @@ public class DescernActivity extends AppCompatActivity {
         imageView.setImageBitmap(rgba);
 //        currentTme1 = System.currentTimeMillis();
 //        Log.e("XXX",(currentTme1-currentTme)+"");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mythread.interrupt();
+        runing = false;
     }
 }
