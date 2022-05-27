@@ -51,7 +51,10 @@
             android:value="iinLTplUFn7b8Zy2dl8755" /> <!-- 接收来自个推的消息 -->
         <service android:name=".ChiFen.DemoIntentService" />
 
-        <activity android:name=".TestActivity">
+        <activity
+            android:name=".TestActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:windowSoftInputMode="stateHidden|adjustResize">
 <!--            <intent-filter>-->
 <!--                <action android:name="android.intent.action.MAIN" />-->
 

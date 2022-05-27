@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.Image;
@@ -24,6 +23,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.WebSettings;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -45,6 +45,7 @@ import com.example.lksynthesizeapp.ChiFen.Media.MediaCallBack;
 import com.example.lksynthesizeapp.ChiFen.Media.Notifications;
 import com.example.lksynthesizeapp.ChiFen.Media.ScreenRecorder;
 import com.example.lksynthesizeapp.ChiFen.Media.VideoEncodeConfig;
+import com.example.lksynthesizeapp.ChiFen.View.MyWebView;
 import com.example.lksynthesizeapp.Constant.Base.BaseActivity;
 import com.example.lksynthesizeapp.Constant.Base.Constant;
 import com.example.lksynthesizeapp.Constant.Base.ProgressDialogUtil;
@@ -54,7 +55,6 @@ import com.example.lksynthesizeapp.Constant.Net.getIp;
 import com.example.lksynthesizeapp.R;
 
 import java.io.File;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -66,8 +66,8 @@ import butterknife.OnClick;
 import pub.devrel.easypermissions.EasyPermissions;
 
 public class LocalActivity extends BaseActivity implements EasyPermissions.PermissionCallbacks {
-    @BindView(R.id.imageView)
-    ImageView imageView;
+    @BindView(R.id.webView)
+    MyWebView webView;
     @BindView(R.id.rbCamera)
     RadioButton rbCamera;
     @BindView(R.id.rbSound)
@@ -138,47 +138,47 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
         if (mMediaProjection == null) {
             requestMediaProjection();
         }
+        Intent intent = getIntent();
+        project = intent.getStringExtra("project");
+        workName = intent.getStringExtra("etWorkName");
+        workCode = intent.getStringExtra("etWorkCode");
+        if (project.trim().equals("") && workName.trim().equals("") && workCode.trim().equals("")) {
+            radioGroup.setVisibility(View.GONE);
+        }
+        if (!project.trim().equals("")) {
+            tvCompName.setText(project);
+        }
+        if (!workName.trim().equals("")) {
+            tvWorkName.setText(workName);
+        }
+        if (!workCode.trim().equals("")) {
+            tvWorkCode.setText(workCode);
+        }
 
+        WebSettings WebSet = webView.getSettings();    //获取webview设置
+//        WebSet.setJavaScriptEnabled(true);              //设置JavaScript支持
+//        WebSet.setSupportZoom(false);            // 设置可以支持缩放
+//        WebSet.setBuiltInZoomControls(false);    // 设置出现缩放工具
+//        WebSet.setUseWideViewPort(false);        //扩大比例的缩放
+        WebSet.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);   //自适应屏幕
+//        WebSet.setLoadWithOverviewMode(true);
+        //禁止上下左右滚动(不显示滚动条)
+        webView.setScrollContainer(false);
+        webView.setVerticalScrollBarEnabled(false);
+        webView.setHorizontalScrollBarEnabled(false);
 
+        webView.setBackgroundColor(getColor(R.color.black));
         try {
             address = new getIp().getConnectIp();
-            address = "http://" + address + ":8080?action=snapshot";
-            mythread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    while (true) {
-                        draw();
-                    }
-                }
-            });
-            mythread.start();
+            if (address!=null){
+                address = "http://" + address + ":8080";
+                webView.loadUrl(address);
+            }else {
+                Toast.makeText(mNotifications, "IP为空", Toast.LENGTH_SHORT).show();
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-
-    private void draw() {
-        // TODO Auto-generated method stub
-        try {
-            InputStream inputstream = null;
-            //创建一个URL对象
-            videoUrl = new URL(address);
-            //利用HttpURLConnection对象从网络中获取网页数据
-            conn = (HttpURLConnection) videoUrl.openConnection();
-            //设置输入流
-            conn.setDoInput(true);
-            //连接
-            conn.connect();
-            //得到网络返回的输入流
-            inputstream = conn.getInputStream();
-            //创建出一个bitmap
-            bitmap = BitmapFactory.decodeStream(inputstream);
-            handlerSetting.sendEmptyMessage(Constant.TAG_THERE);
-            //关闭HttpURLConnection连接
-            conn.disconnect();
-        } catch (Exception ex) {
-            Log.e("XXX", ex.toString());
-        } finally {
         }
     }
 
@@ -202,18 +202,18 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
         project = intent.getStringExtra("project");
         workName = intent.getStringExtra("etWorkName");
         workCode = intent.getStringExtra("etWorkCode");
-        if (project.trim().equals("") && workName.trim().equals("") && workCode.trim().equals("")) {
-            linlayoutData.setVisibility(View.GONE);
-        }
-        if (!project.trim().equals("")) {
-            tvCompName.setText(project);
-        }
-        if (!workName.trim().equals("")) {
-            tvWorkName.setText(workName);
-        }
-        if (!workCode.trim().equals("")) {
-            tvWorkCode.setText(workCode);
-        }
+//        if (project.trim().equals("") && workName.trim().equals("") && workCode.trim().equals("")) {
+//            linlayoutData.setVisibility(View.GONE);
+//        }
+//        if (!project.trim().equals("")) {
+//            tvCompName.setText(project);
+//        }
+//        if (!workName.trim().equals("")) {
+//            tvWorkName.setText(workName);
+//        }
+//        if (!workCode.trim().equals("")) {
+//            tvWorkCode.setText(workCode);
+//        }
     }
 
     @OnClick({R.id.rbCamera, R.id.rbSound, R.id.rbAlbum, R.id.rbRefresh, R.id.linearLayoutStop})
@@ -568,9 +568,6 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
                 case Constant.TAG_TWO:
                     Toast.makeText(LocalActivity.this, toastData, Toast.LENGTH_LONG).show();
                     ProgressDialogUtil.stopLoad();
-                    break;
-                case Constant.TAG_THERE:
-                    imageView.setImageBitmap(bitmap);
                     break;
             }
         }

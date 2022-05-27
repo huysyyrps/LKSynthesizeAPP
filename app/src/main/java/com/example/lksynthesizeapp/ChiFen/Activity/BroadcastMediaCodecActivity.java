@@ -6,18 +6,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,11 +22,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.lksynthesizeapp.ChiFen.Base.BottomUI;
 import com.example.lksynthesizeapp.ChiFen.MediaCodec.ScreenLive;
+import com.example.lksynthesizeapp.ChiFen.View.MyWebView;
 import com.example.lksynthesizeapp.Constant.Net.getIp;
 import com.example.lksynthesizeapp.R;
 import com.example.lksynthesizeapp.SharePreferencesUtils;
 
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -57,8 +53,8 @@ public class BroadcastMediaCodecActivity extends AppCompatActivity {
     TextView tvWorkCode;
     @BindView(R.id.linearLayout1)
     LinearLayout linearLayout1;
-    @BindView(R.id.imageView)
-    ImageView imageView;
+    @BindView(R.id.webView)
+    MyWebView webView;
     private Thread mythread;
     URL videoUrl;
     HttpURLConnection conn;
@@ -105,16 +101,17 @@ public class BroadcastMediaCodecActivity extends AppCompatActivity {
             Intent captureIntent = mediaProjectionManager.createScreenCaptureIntent();
             startActivityForResult(captureIntent, 100);
         }else {
-            address = "http://" + address + ":8080?action=snapshot";
-            mythread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    while (true) {
-                        draw();
-                    }
-                }
-            });
-            mythread.start();
+            if (address!=null){
+                webView.setScrollContainer(false);
+                webView.setVerticalScrollBarEnabled(false);
+                webView.setHorizontalScrollBarEnabled(false);
+                webView.setBackgroundColor(getColor(R.color.black));
+                address = "http://" + address + ":8080";
+                webView.loadUrl(address);
+            }else {
+                Toast.makeText(BroadcastMediaCodecActivity.this, "IP为空", Toast.LENGTH_SHORT).show();
+            }
+
             Log.e("XXXXX", address);
             mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
             Intent captureIntent = mediaProjectionManager.createScreenCaptureIntent();
@@ -155,39 +152,4 @@ public class BroadcastMediaCodecActivity extends AppCompatActivity {
         super.onDestroy();
         screenLive.stopLive();
     }
-
-    private void draw() {
-        // TODO Auto-generated method stub
-        try {
-            InputStream inputstream = null;
-            //创建一个URL对象
-            videoUrl = new URL(address);
-            //利用HttpURLConnection对象从网络中获取网页数据
-            conn = (HttpURLConnection) videoUrl.openConnection();
-            //设置输入流
-            conn.setDoInput(true);
-            //连接
-            conn.connect();
-            //得到网络返回的输入流
-            inputstream = conn.getInputStream();
-            //创建出一个bitmap
-            bitmap = BitmapFactory.decodeStream(inputstream);
-            Message message = new Message();
-            message.what = 1;
-            handler.sendMessage(message);
-            //关闭HttpURLConnection连接
-            conn.disconnect();
-        } catch (Exception ex) {
-            Log.e("XXX", ex.toString());
-        } finally {
-        }
-    }
-
-    Handler handler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            imageView.setImageBitmap(bitmap);
-        }
-    };
 }
