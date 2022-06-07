@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -85,17 +86,21 @@ public class DescernActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        url = "http://"+ address + ":8080?action=snapshot";
-        mythread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (runing) {
-                    draw();
-                    currentTme = System.currentTimeMillis();
+        if(address == null){
+            Toast.makeText(this, "获取IP为空", Toast.LENGTH_SHORT).show();
+        }else {
+            url = "http://"+ address + ":8080?action=snapshot";
+            mythread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (runing) {
+                        draw();
+                        currentTme = System.currentTimeMillis();
+                    }
                 }
-            }
-        });
-        mythread.start();
+            });
+            mythread.start();
+        }
     }
 
     private void draw() {

@@ -184,11 +184,11 @@ ReLU             LeakyRelu_199            1 1 371 372 0=1.000000e-01
 Convolution      Conv_200                 1 1 372 373 0=512 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=262144
 ReLU             LeakyRelu_201            1 1 373 374 0=1.000000e-01
 Convolution      Conv_202                 1 1 342_splitncnn_0 375 0=21 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=2688
-Reshape          Reshape_216              1 1 375 393 0=-1 1=7 2=3
+Reshape          Reshape_216              1 1 375 393 0=6400 1=7 2=3
 Permute          Transpose_217            1 1 393 output 0=1
 Convolution      Conv_218                 1 1 358_splitncnn_0 395 0=21 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=5376
-Reshape          Reshape_232              1 1 395 413 0=-1 1=7 2=3
+Reshape          Reshape_232              1 1 395 413 0=1600 1=7 2=3
 Permute          Transpose_233            1 1 413 414 0=1
 Convolution      Conv_234                 1 1 374 415 0=21 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=10752
-Reshape          Reshape_248              1 1 415 433 0=-1 1=7 2=3
+Reshape          Reshape_248              1 1 415 433 0=400 1=7 2=3
 Permute          Transpose_249            1 1 433 434 0=1

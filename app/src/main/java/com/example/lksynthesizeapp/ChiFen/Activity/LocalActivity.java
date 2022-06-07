@@ -32,6 +32,8 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.lksynthesizeapp.BuildConfig;
 import com.example.lksynthesizeapp.ChiFen.Base.BottomUI;
 import com.example.lksynthesizeapp.ChiFen.Base.GetDate;
@@ -46,7 +48,6 @@ import com.example.lksynthesizeapp.ChiFen.Media.Notifications;
 import com.example.lksynthesizeapp.ChiFen.Media.ScreenRecorder;
 import com.example.lksynthesizeapp.ChiFen.Media.VideoEncodeConfig;
 import com.example.lksynthesizeapp.ChiFen.View.MyWebView;
-import com.example.lksynthesizeapp.Constant.Base.BaseActivity;
 import com.example.lksynthesizeapp.Constant.Base.Constant;
 import com.example.lksynthesizeapp.Constant.Base.ProgressDialogUtil;
 import com.example.lksynthesizeapp.Constant.Net.SSHCallBack;
@@ -55,8 +56,6 @@ import com.example.lksynthesizeapp.Constant.Net.getIp;
 import com.example.lksynthesizeapp.R;
 
 import java.io.File;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -65,7 +64,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class LocalActivity extends BaseActivity implements EasyPermissions.PermissionCallbacks {
+public class LocalActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks {
     @BindView(R.id.webView)
     MyWebView webView;
     @BindView(R.id.rbCamera)
@@ -112,15 +111,19 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
     String[] PERMS = {Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.FOREGROUND_SERVICE};
-    private Thread mythread;
-    URL videoUrl;
-    HttpURLConnection conn;
-    Bitmap bitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //不息屏
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        // 设置全屏
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        //隐藏底部按钮
+        new BottomUI().hideBottomUIMenu(this.getWindow());
+        setContentView(R.layout.activity_local);
         ButterKnife.bind(this);
+
         setWorkData();
         mWindowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
         mWindowWidth = mWindowManager.getDefaultDisplay().getWidth();
@@ -130,9 +133,6 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
         mScreenDensity = displayMetrics.densityDpi;
         mImageReader = ImageReader.newInstance(mWindowWidth, mWindowHeight, 0x1, 2);
         frameLayout.setBackgroundColor(getResources().getColor(R.color.black));
-        //全屏设置
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         mMediaProjectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
         mNotifications = new Notifications(getApplicationContext());
         if (mMediaProjection == null) {
@@ -176,25 +176,10 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
             }else {
                 Toast.makeText(mNotifications, "IP为空", Toast.LENGTH_SHORT).show();
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    protected int provideContentViewId() {
-        return R.layout.activity_local;
-    }
-
-    @Override
-    protected boolean isHasHeader() {
-        return false;
-    }
-
-    @Override
-    protected void rightClient() {
-
+        new BottomUI().hideBottomUIMenu(this.getWindow());
     }
 
     private void setWorkData() {
@@ -202,18 +187,18 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
         project = intent.getStringExtra("project");
         workName = intent.getStringExtra("etWorkName");
         workCode = intent.getStringExtra("etWorkCode");
-//        if (project.trim().equals("") && workName.trim().equals("") && workCode.trim().equals("")) {
-//            linlayoutData.setVisibility(View.GONE);
-//        }
-//        if (!project.trim().equals("")) {
-//            tvCompName.setText(project);
-//        }
-//        if (!workName.trim().equals("")) {
-//            tvWorkName.setText(workName);
-//        }
-//        if (!workCode.trim().equals("")) {
-//            tvWorkCode.setText(workCode);
-//        }
+        if (project.trim().equals("") && workName.trim().equals("") && workCode.trim().equals("")) {
+            linlayoutData.setVisibility(View.GONE);
+        }
+        if (!project.trim().equals("")) {
+            tvCompName.setText(project);
+        }
+        if (!workName.trim().equals("")) {
+            tvWorkName.setText(workName);
+        }
+        if (!workCode.trim().equals("")) {
+            tvWorkCode.setText(workCode);
+        }
     }
 
     @OnClick({R.id.rbCamera, R.id.rbSound, R.id.rbAlbum, R.id.rbRefresh, R.id.linearLayoutStop})
@@ -224,7 +209,6 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
                 if (toast != null) {
                     toast.cancel();
                 }
-                new BottomUI().hideBottomUIMenu(this.getWindow());
                 if (mMediaProjection != null) {
                     setUpVirtualDisplay();
                     Handler handler = new Handler();
@@ -235,24 +219,6 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
                         }
                     }, 200);
                 }
-
-
-//                radioGroup.setVisibility(View.GONE);
-//                new BottomUI().hideBottomUIMenu(this.getWindow());
-//                View imageView = view.getRootView();
-//                imageView.setDrawingCacheEnabled(true);
-//                imageView.buildDrawingCache();
-//                Bitmap mBitmap = imageView.getDrawingCache();
-//                boolean backstate = new ImageSave().saveBitmap(project, workName, workCode, radioGroup, this, mBitmap);
-//                if (backstate) {
-//                    radioGroup.setVisibility(View.VISIBLE);
-//                    new BottomUI().BottomUIMenu(this.getWindow());
-//                    Toast.makeText(this, R.string.save_success, Toast.LENGTH_SHORT).show();
-//                } else {
-//                    radioGroup.setVisibility(View.VISIBLE);
-//                    new BottomUI().BottomUIMenu(this.getWindow());
-//                    Toast.makeText(this, R.string.save_faile, Toast.LENGTH_SHORT).show();
-//                }
                 break;
             case R.id.rbSound:
                 if (EasyPermissions.hasPermissions(this, PERMS)) {
@@ -269,10 +235,8 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
                 }
                 break;
             case R.id.linearLayoutStop:
-                new BottomUI().BottomUIMenu(this.getWindow());
                 radioGroup.setVisibility(View.VISIBLE);
                 linearLayoutStop.setVisibility(View.GONE);
-                new BottomUI().BottomUIMenu(this.getWindow());
                 if (mRecorder != null) {
                     stopRecordingAndOpenFile();
                 }
@@ -316,12 +280,10 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
             boolean backstate = new ImageSave().saveBitmap(project, workName, workCode, radioGroup, this, mBitmap);
             if (backstate) {
                 radioGroup.setVisibility(View.VISIBLE);
-                new BottomUI().BottomUIMenu(this.getWindow());
                 toast = Toast.makeText(LocalActivity.this, R.string.save_success, Toast.LENGTH_SHORT);
                 toast.show();
             } else {
                 radioGroup.setVisibility(View.VISIBLE);
-                new BottomUI().BottomUIMenu(this.getWindow());
                 toast = Toast.makeText(LocalActivity.this, R.string.save_faile, Toast.LENGTH_SHORT);
                 toast.show();
             }
@@ -365,7 +327,6 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
 
     private void startCapturing(MediaProjection mediaProjection) {
         radioGroup.setVisibility(View.GONE);
-        new BottomUI().hideBottomUIMenu(this.getWindow());
         linearLayoutStop.setVisibility(View.VISIBLE);
         new Thread(new Runnable() {
             public void run() {
@@ -545,6 +506,7 @@ public class LocalActivity extends BaseActivity implements EasyPermissions.Permi
         switch (requestCode) {
             case Constant.TAG_ONE:
                 if (resultCode == Activity.RESULT_OK) {
+                    new BottomUI().hideBottomUIMenu(this.getWindow());
                     mMediaProjection = mMediaProjectionManager.getMediaProjection(resultCode, backdata);
 //                    new TirenSet().checkTirem(ivTimer);
 //                    startCapturing(mMediaProjection);
