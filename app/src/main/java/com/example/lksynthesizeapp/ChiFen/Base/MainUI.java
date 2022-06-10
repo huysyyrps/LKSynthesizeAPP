@@ -22,6 +22,7 @@ public class MainUI {
             public boolean onMenuItemClick(MenuItem item) {
                 if (item.getTitle().equals("图片")){
                     Intent intent = new Intent(mainActivity, PhotoActivity.class);
+                    intent.putExtra("tag","Local");
                     mainActivity.startActivity(intent);
                 }else if (item.getTitle().equals("视频")){
                     Intent intent = new Intent(mainActivity, VideoActivity.class);

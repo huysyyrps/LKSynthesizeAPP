@@ -84,6 +84,7 @@ public class PhotoActivity extends BaseActivity implements PhotoContract.View {
         project = sharePreferencesUtils.getString(PhotoActivity.this,"project","");
         workName = sharePreferencesUtils.getString(PhotoActivity.this,"workName","");
         workCode = sharePreferencesUtils.getString(PhotoActivity.this,"workCode","");
+        String tag = getIntent().getStringExtra("tag");
         header.setTvTitle("图库");
         photoPresenter = new PhotoPresenter(this,this);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(PhotoActivity.this, 3);
@@ -165,7 +166,11 @@ public class PhotoActivity extends BaseActivity implements PhotoContract.View {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                getFilesAllName(Environment.getExternalStorageDirectory() + "/LUKEImage/"+project+"/"+"设备/"+workName+"/"+workCode+"/");
+                if (tag.equals("Local")){
+                    getFilesAllName(Environment.getExternalStorageDirectory() + "/LUKEImage/"+project+"/"+"设备/"+workName+"/"+workCode+"/");
+                }else {
+                    getFilesAllName(Environment.getExternalStorageDirectory() + "/LUKEDecsImage/"+project+"/"+"设备/"+workName+"/"+workCode+"/");
+                }
             }
         }).start();
     }

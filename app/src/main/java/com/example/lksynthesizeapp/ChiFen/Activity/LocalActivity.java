@@ -91,6 +91,8 @@ public class LocalActivity extends AppCompatActivity implements EasyPermissions.
     FrameLayout frameLayout;
     @BindView(R.id.linlayoutData)
     LinearLayout linlayoutData;
+    @BindView(R.id.rbBack)
+    RadioButton rbBack;
 
     private Toast toast;
     String address;
@@ -170,10 +172,10 @@ public class LocalActivity extends AppCompatActivity implements EasyPermissions.
         webView.setBackgroundColor(getColor(R.color.black));
         try {
             address = new getIp().getConnectIp();
-            if (address!=null){
+            if (address != null) {
                 address = "http://" + address + ":8080";
                 webView.loadUrl(address);
-            }else {
+            } else {
                 Toast.makeText(mNotifications, "IP为空", Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
@@ -201,7 +203,7 @@ public class LocalActivity extends AppCompatActivity implements EasyPermissions.
         }
     }
 
-    @OnClick({R.id.rbCamera, R.id.rbSound, R.id.rbAlbum, R.id.rbRefresh, R.id.linearLayoutStop})
+    @OnClick({R.id.rbCamera, R.id.rbSound, R.id.rbAlbum, R.id.rbRefresh, R.id.linearLayoutStop, R.id.rbBack})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.rbCamera:
@@ -248,6 +250,9 @@ public class LocalActivity extends AppCompatActivity implements EasyPermissions.
 //                ShowDialog("/etc/init.d/mjpg-streamer restart");
                 ShowDialog("uci set mjpg-streamer.core.fps=20", "uci commit", "/etc/init.d/mjpg-streamer restart");
                 break;
+            case R.id.rbBack:
+                finish();
+                break;
         }
     }
 
@@ -277,7 +282,7 @@ public class LocalActivity extends AppCompatActivity implements EasyPermissions.
         image.close();
         stopScreenCapture();
         if (mBitmap != null) {
-            boolean backstate = new ImageSave().saveBitmap(project, workName, workCode, radioGroup, this, mBitmap);
+            boolean backstate = new ImageSave().saveBitmap("/LUKEImage/", project, workName, workCode, this, mBitmap);
             if (backstate) {
                 radioGroup.setVisibility(View.VISIBLE);
                 toast = Toast.makeText(LocalActivity.this, R.string.save_success, Toast.LENGTH_SHORT);
@@ -424,6 +429,7 @@ public class LocalActivity extends AppCompatActivity implements EasyPermissions.
 
     /**
      * 重启服务刷新视频
+     *
      * @param data1
      */
     private void ShowDialog(String data1) {

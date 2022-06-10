@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
-import android.widget.RadioGroup;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,11 +18,11 @@ public class ImageSave {
     /**
      * 保存图片方法
      */
-    public boolean saveBitmap(String project, String workName, String workCode, RadioGroup radioGroup, Context context, Bitmap bitmap) {
+    public boolean saveBitmap(String local, String project, String workName, String workCode, Context context, Bitmap bitmap) {
         getNowDate();
         try {
-            String dir = Environment.getExternalStorageDirectory() + "/LUKEImage/" + project + "/" + "设备/" + workName + "/" + workCode + "/";//图片保存的文件夹名
-            File file = new File(Environment.getExternalStorageDirectory() + "/LUKEImage/" + project + "/" + "设备/" + workName + "/" + workCode + "/");
+            String dir = Environment.getExternalStorageDirectory() + local + project + "/" + "设备/" + workName + "/" + workCode + "/";//图片保存的文件夹名
+            File file = new File(Environment.getExternalStorageDirectory() + local + project + "/" + "设备/" + workName + "/" + workCode + "/");
             //如果不存在  就mkdirs()创建此文件夹
             if (!file.exists()) {
                 file.mkdirs();

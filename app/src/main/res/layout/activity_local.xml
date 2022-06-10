@@ -48,6 +48,12 @@
             android:background="@drawable/button_select"
             android:drawableLeft="@drawable/ic_refresh" />
 
+        <RadioButton
+            android:id="@+id/rbBack"
+            style="@style/MainRadionButton"
+            android:background="@drawable/button_select"
+            android:drawableLeft="@drawable/ic_finish" />
+
     </RadioGroup>
     <LinearLayout
         android:id="@+id/linlayoutData"

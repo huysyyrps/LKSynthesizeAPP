@@ -1,5 +1,7 @@
 package com.example.lksynthesizeapp.ChiFen.Activity;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -8,14 +10,20 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.lksynthesizeapp.ChiFen.Base.BottomUI;
+import com.example.lksynthesizeapp.ChiFen.Base.ImageSave;
 import com.example.lksynthesizeapp.Constant.Net.getIp;
 import com.example.lksynthesizeapp.R;
 import com.example.lksynthesizeapp.YoloV5Ncnn;
@@ -24,13 +32,12 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class DescernActivity extends AppCompatActivity {
-    private static final int SELECT_IMAGE = 1;
+public class DescernActivity extends AppCompatActivity implements View.OnClickListener {
     private String url;
     private ImageView imageView;
+    private RadioButton rbAlbum,rbBack;
+    private TextView tvCompName, tvWorkName, tvWorkCode;
     private Bitmap bmp = null;
-    private Bitmap bitmap = null;
-    private Bitmap yourSelectedImage = null;
     private Thread mythread;
     private YoloV5Ncnn yolov5ncnn = new YoloV5Ncnn();
     URL videoUrl;
@@ -38,15 +45,15 @@ public class DescernActivity extends AppCompatActivity {
     Paint paint;
     Paint textbgpaint;
     Paint textpaint;
-    private int w;
-    private int h;
-    private float scanw;
-    private float scanh;
     private MediaPlayer mediaPlayer;
     long currentTme = 0;
-    long currentTme1 = 0;
-    private String address = "";
     public boolean runing = true;
+    public static String project = "", workName = "", workCode = "", address = "";
+    public boolean isFirst = true;
+    public long saveTime = 0;
+    public long currentTmeTime = 0;
+    public static final int TIME = 3000;
+    Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,15 +88,35 @@ public class DescernActivity extends AppCompatActivity {
             Log.e("MainActivity", "yolov5ncnn Init failed");
         }
         imageView = (ImageView) findViewById(R.id.imageView);
+        tvCompName = findViewById(R.id.tvCompName);
+        tvWorkName = findViewById(R.id.tvWorkName);
+        tvWorkCode = findViewById(R.id.tvWorkCode);
+        rbAlbum = findViewById(R.id.rbAlbum);
+        rbBack = findViewById(R.id.rbBack);
+        rbAlbum.setOnClickListener(this);
+        rbBack.setOnClickListener(this);
+        Intent intent = getIntent();
+        project = intent.getStringExtra("project");
+        workName = intent.getStringExtra("etWorkName");
+        workCode = intent.getStringExtra("etWorkCode");
+        if (!project.trim().equals("")) {
+            tvCompName.setText(project);
+        }
+        if (!workName.trim().equals("")) {
+            tvWorkName.setText(workName);
+        }
+        if (!workCode.trim().equals("")) {
+            tvWorkCode.setText(workCode);
+        }
         try {
             address = new getIp().getConnectIp();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if(address == null){
+        if (address == null) {
             Toast.makeText(this, "获取IP为空", Toast.LENGTH_SHORT).show();
-        }else {
-            url = "http://"+ address + ":8080?action=snapshot";
+        } else {
+            url = "http://" + address + ":8080?action=snapshot";
             mythread = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -101,6 +128,7 @@ public class DescernActivity extends AppCompatActivity {
             });
             mythread.start();
         }
+        new BottomUI().hideBottomUIMenu(this.getWindow());
     }
 
     private void draw() {
@@ -133,6 +161,7 @@ public class DescernActivity extends AppCompatActivity {
 
     /**
      * 调整图片大小
+     *
      * @param bitmap 源
      * @param dst_w  输出宽度
      * @param dst_h  输出高度
@@ -160,18 +189,15 @@ public class DescernActivity extends AppCompatActivity {
 
         // draw objects on bitmap
         Bitmap rgba = bmp.copy(Bitmap.Config.ARGB_8888, true);
-
-
         Canvas canvas = new Canvas(rgba);
-
         for (int i = 0; i < objects.length; i++) {
             canvas.drawRect(objects[i].x, objects[i].y, objects[i].x + objects[i].w, objects[i].y + objects[i].h, paint);
             // draw filled text inside image
             {
                 String text = objects[i].label + " = " + String.format("%.1f", objects[i].prob * 100) + "%";
 
-                float text_width = textpaint.measureText(text)+10;
-                float text_height = -textpaint.ascent() + textpaint.descent()+10;
+                float text_width = textpaint.measureText(text) + 10;
+                float text_height = -textpaint.ascent() + textpaint.descent() + 10;
 
                 float x = objects[i].x;
                 float y = objects[i].y - text_height;
@@ -183,12 +209,37 @@ public class DescernActivity extends AppCompatActivity {
                 canvas.drawText(text, x, y - textpaint.ascent(), textpaint);
             }
         }
-        if (objects.length!=0){
+        if (objects.length != 0) {
             mediaPlayer.start();
+            if (isFirst) {
+                saveImageToGallery(DescernActivity.this, rgba);
+                saveTime = System.currentTimeMillis();
+                isFirst = false;
+            } else {
+                if (handler == null) {
+                    handler = new Handler(Looper.getMainLooper());
+                } else {
+                    currentTmeTime = System.currentTimeMillis();
+                    if (currentTmeTime - saveTime > 3000) {
+                        saveImageToGallery(DescernActivity.this, rgba);
+                        saveTime = currentTmeTime;
+                    }
+                }
+            }
         }
         imageView.setImageBitmap(rgba);
 //        currentTme1 = System.currentTimeMillis();
 //        Log.e("XXX",(currentTme1-currentTme)+"");
+    }
+
+
+    public static void saveImageToGallery(Context context, Bitmap bmp) {
+        boolean backstate = new ImageSave().saveBitmap("/LUKEDecsImage/", project, workName, workCode, context, bmp);
+        if (backstate) {
+            Log.e("XXX", "保存成功");
+        } else {
+            Log.e("XXX", "保存失败");
+        }
     }
 
     @Override
@@ -196,5 +247,46 @@ public class DescernActivity extends AppCompatActivity {
         super.onDestroy();
         mythread.interrupt();
         runing = false;
+    }
+
+//    public boolean onTouchEvent(MotionEvent event) {
+//        switch (event.getAction()) {
+//            case MotionEvent.ACTION_DOWN:
+//                if (rbAlbum.getVisibility()==View.VISIBLE){
+//                    rbAlbum.setVisibility(View.GONE);
+//                }else {
+//                    rbAlbum.setVisibility(View.VISIBLE);
+//                    new Handler().postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            rbAlbum.setVisibility(View.GONE);
+//                        }
+//                    },3000);
+//                }
+//                break;
+//        }
+//
+//        return true;
+//    }
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        new BottomUI().hideBottomUIMenu(this.getWindow());
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.rbAlbum:
+                Intent intent = new Intent(this, PhotoActivity.class);
+                intent.putExtra("tag","Descern");
+                startActivity(intent);
+                break;
+            case R.id.rbBack:
+                mythread.interrupt();
+                runing = false;
+                finish();
+                break;
+        }
     }
 }
