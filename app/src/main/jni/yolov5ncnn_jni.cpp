@@ -212,22 +212,19 @@ int sendAudio(int8_t *buf, int len, int type, int tms) {
 }
 
 
-
 static ncnn::UnlockedPoolAllocator g_blob_pool_allocator;
 static ncnn::PoolAllocator g_workspace_pool_allocator;
 
 static ncnn::Net yolov5;
 
-class YoloV5Focus : public ncnn::Layer
-{
+class YoloV5Focus : public ncnn::Layer {
 public:
-    YoloV5Focus()
-    {
+    YoloV5Focus() {
         one_blob_only = true;
     }
 
-    virtual int forward(const ncnn::Mat& bottom_blob, ncnn::Mat& top_blob, const ncnn::Option& opt) const
-    {
+    virtual int
+    forward(const ncnn::Mat &bottom_blob, ncnn::Mat &top_blob, const ncnn::Option &opt) const {
         int w = bottom_blob.w;
         int h = bottom_blob.h;
         int channels = bottom_blob.c;
@@ -240,16 +237,14 @@ public:
         if (top_blob.empty())
             return -100;
 
-        #pragma omp parallel for num_threads(opt.num_threads)
-        for (int p = 0; p < outc; p++)
-        {
-            const float* ptr = bottom_blob.channel(p % channels).row((p / channels) % 2) + ((p / channels) / 2);
-            float* outptr = top_blob.channel(p);
+#pragma omp parallel for num_threads(opt.num_threads)
+        for (int p = 0; p < outc; p++) {
+            const float *ptr = bottom_blob.channel(p % channels).row((p / channels) % 2) +
+                               ((p / channels) / 2);
+            float *outptr = top_blob.channel(p);
 
-            for (int i = 0; i < outh; i++)
-            {
-                for (int j = 0; j < outw; j++)
-                {
+            for (int i = 0; i < outh; i++) {
+                for (int j = 0; j < outw; j++) {
                     *outptr = *ptr;
 
                     outptr += 1;
@@ -266,8 +261,7 @@ public:
 
 DEFINE_LAYER_CREATOR(YoloV5Focus)
 
-struct Object
-{
+struct Object {
     float x;
     float y;
     float w;
@@ -276,10 +270,8 @@ struct Object
     float prob;
 };
 
-static inline float intersection_area(const Object& a, const Object& b)
-{
-    if (a.x > b.x + b.w || a.x + a.w < b.x || a.y > b.y + b.h || a.y + a.h < b.y)
-    {
+static inline float intersection_area(const Object &a, const Object &b) {
+    if (a.x > b.x + b.w || a.x + a.w < b.x || a.y > b.y + b.h || a.y + a.h < b.y) {
         // no intersection
         return 0.f;
     }
@@ -290,22 +282,19 @@ static inline float intersection_area(const Object& a, const Object& b)
     return inter_width * inter_height;
 }
 
-static void qsort_descent_inplace(std::vector<Object>& faceobjects, int left, int right)
-{
+static void qsort_descent_inplace(std::vector<Object> &faceobjects, int left, int right) {
     int i = left;
     int j = right;
     float p = faceobjects[(left + right) / 2].prob;
 
-    while (i <= j)
-    {
+    while (i <= j) {
         while (faceobjects[i].prob > p)
             i++;
 
         while (faceobjects[j].prob < p)
             j--;
 
-        if (i <= j)
-        {
+        if (i <= j) {
             // swap
             std::swap(faceobjects[i], faceobjects[j]);
 
@@ -314,47 +303,43 @@ static void qsort_descent_inplace(std::vector<Object>& faceobjects, int left, in
         }
     }
 
-    #pragma omp parallel sections
+#pragma omp parallel sections
     {
-        #pragma omp section
+#pragma omp section
         {
             if (left < j) qsort_descent_inplace(faceobjects, left, j);
         }
-        #pragma omp section
+#pragma omp section
         {
             if (i < right) qsort_descent_inplace(faceobjects, i, right);
         }
     }
 }
 
-static void qsort_descent_inplace(std::vector<Object>& faceobjects)
-{
+static void qsort_descent_inplace(std::vector<Object> &faceobjects) {
     if (faceobjects.empty())
         return;
 
     qsort_descent_inplace(faceobjects, 0, faceobjects.size() - 1);
 }
 
-static void nms_sorted_bboxes(const std::vector<Object>& faceobjects, std::vector<int>& picked, float nms_threshold)
-{
+static void nms_sorted_bboxes(const std::vector<Object> &faceobjects, std::vector<int> &picked,
+                              float nms_threshold) {
     picked.clear();
 
     const int n = faceobjects.size();
 
     std::vector<float> areas(n);
-    for (int i = 0; i < n; i++)
-    {
+    for (int i = 0; i < n; i++) {
         areas[i] = faceobjects[i].w * faceobjects[i].h;
     }
 
-    for (int i = 0; i < n; i++)
-    {
-        const Object& a = faceobjects[i];
+    for (int i = 0; i < n; i++) {
+        const Object &a = faceobjects[i];
 
         int keep = 1;
-        for (int j = 0; j < (int)picked.size(); j++)
-        {
-            const Object& b = faceobjects[picked[j]];
+        for (int j = 0; j < (int) picked.size(); j++) {
+            const Object &b = faceobjects[picked[j]];
 
             // intersection over union
             float inter_area = intersection_area(a, b);
@@ -369,24 +354,21 @@ static void nms_sorted_bboxes(const std::vector<Object>& faceobjects, std::vecto
     }
 }
 
-static inline float sigmoid(float x)
-{
+static inline float sigmoid(float x) {
     return static_cast<float>(1.f / (1.f + exp(-x)));
 }
 
-static void generate_proposals(const ncnn::Mat& anchors, int stride, const ncnn::Mat& in_pad, const ncnn::Mat& feat_blob, float prob_threshold, std::vector<Object>& objects)
-{
+static void generate_proposals(const ncnn::Mat &anchors, int stride, const ncnn::Mat &in_pad,
+                               const ncnn::Mat &feat_blob, float prob_threshold,
+                               std::vector<Object> &objects) {
     const int num_grid = feat_blob.h;
 
     int num_grid_x;
     int num_grid_y;
-    if (in_pad.w > in_pad.h)
-    {
+    if (in_pad.w > in_pad.h) {
         num_grid_x = in_pad.w / stride;
         num_grid_y = num_grid / num_grid_x;
-    }
-    else
-    {
+    } else {
         num_grid_y = in_pad.h / stride;
         num_grid_x = num_grid / num_grid_y;
     }
@@ -395,27 +377,22 @@ static void generate_proposals(const ncnn::Mat& anchors, int stride, const ncnn:
 
     const int num_anchors = anchors.w / 2;
 
-    for (int q = 0; q < num_anchors; q++)
-    {
+    for (int q = 0; q < num_anchors; q++) {
         const float anchor_w = anchors[q * 2];
         const float anchor_h = anchors[q * 2 + 1];
 
         const ncnn::Mat feat = feat_blob.channel(q);
 
-        for (int i = 0; i < num_grid_y; i++)
-        {
-            for (int j = 0; j < num_grid_x; j++)
-            {
-                const float* featptr = feat.row(i * num_grid_x + j);
+        for (int i = 0; i < num_grid_y; i++) {
+            for (int j = 0; j < num_grid_x; j++) {
+                const float *featptr = feat.row(i * num_grid_x + j);
 
                 // find class index with max class score
                 int class_index = 0;
                 float class_score = -FLT_MAX;
-                for (int k = 0; k < num_class; k++)
-                {
+                for (int k = 0; k < num_class; k++) {
                     float score = featptr[5 + k];
-                    if (score > class_score)
-                    {
+                    if (score > class_score) {
                         class_index = k;
                         class_score = score;
                     }
@@ -425,8 +402,7 @@ static void generate_proposals(const ncnn::Mat& anchors, int stride, const ncnn:
 
                 float confidence = sigmoid(box_score) * sigmoid(class_score);
 
-                if (confidence >= prob_threshold)
-                {
+                if (confidence >= prob_threshold) {
                     // yolov5/models/yolo.py Detect forward
                     // y = x[i].sigmoid()
                     // y[..., 0:2] = (y[..., 0:2] * 2. - 0.5 + self.grid[i].to(x[i].device)) * self.stride[i]  # xy
@@ -475,8 +451,7 @@ static jfieldID hId;
 static jfieldID labelId;
 static jfieldID probId;
 
-JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved)
-{
+JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     __android_log_print(ANDROID_LOG_DEBUG, "YoloV5Ncnn", "JNI_OnLoad");
 
     ncnn::create_gpu_instance();
@@ -484,16 +459,15 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved)
     return JNI_VERSION_1_4;
 }
 
-JNIEXPORT void JNI_OnUnload(JavaVM* vm, void* reserved)
-{
+JNIEXPORT void JNI_OnUnload(JavaVM *vm, void *reserved) {
     __android_log_print(ANDROID_LOG_DEBUG, "YoloV5Ncnn", "JNI_OnUnload");
 
     ncnn::destroy_gpu_instance();
 }
 
 // public native boolean Init(AssetManager mgr);
-JNIEXPORT jboolean JNICALL Java_com_example_lksynthesizeapp_YoloV5Ncnn_Init(JNIEnv* env, jobject thiz, jobject assetManager)
-{
+JNIEXPORT jboolean JNICALL
+Java_com_example_lksynthesizeapp_YoloV5Ncnn_Init(JNIEnv *env, jobject thiz, jobject assetManager) {
     ncnn::Option opt;
     opt.lightmode = true;
     opt.num_threads = 4;
@@ -505,7 +479,7 @@ JNIEXPORT jboolean JNICALL Java_com_example_lksynthesizeapp_YoloV5Ncnn_Init(JNIE
     if (ncnn::get_gpu_count() != 0)
         opt.use_vulkan_compute = true;
 
-    AAssetManager* mgr = AAssetManager_fromJava(env, assetManager);
+    AAssetManager *mgr = AAssetManager_fromJava(env, assetManager);
 
     yolov5.opt = opt;
 
@@ -514,8 +488,7 @@ JNIEXPORT jboolean JNICALL Java_com_example_lksynthesizeapp_YoloV5Ncnn_Init(JNIE
     // init param
     {
         int ret = yolov5.load_param(mgr, "yolov5s.param");
-        if (ret != 0)
-        {
+        if (ret != 0) {
             __android_log_print(ANDROID_LOG_DEBUG, "YoloV5Ncnn", "load_param failed");
             return JNI_FALSE;
         }
@@ -524,8 +497,7 @@ JNIEXPORT jboolean JNICALL Java_com_example_lksynthesizeapp_YoloV5Ncnn_Init(JNIE
     // init bin
     {
         int ret = yolov5.load_model(mgr, "yolov5s.bin");
-        if (ret != 0)
-        {
+        if (ret != 0) {
             __android_log_print(ANDROID_LOG_DEBUG, "YoloV5Ncnn", "load_model failed");
             return JNI_FALSE;
         }
@@ -535,7 +507,8 @@ JNIEXPORT jboolean JNICALL Java_com_example_lksynthesizeapp_YoloV5Ncnn_Init(JNIE
     jclass localObjCls = env->FindClass("com/example/lksynthesizeapp/YoloV5Ncnn$Obj");
     objCls = reinterpret_cast<jclass>(env->NewGlobalRef(localObjCls));
 
-    constructortorId = env->GetMethodID(objCls, "<init>", "(Lcom/example/lksynthesizeapp/YoloV5Ncnn;)V");
+    constructortorId = env->GetMethodID(objCls, "<init>",
+                                        "(Lcom/example/lksynthesizeapp/YoloV5Ncnn;)V");
 
     xId = env->GetFieldID(objCls, "x", "F");
     yId = env->GetFieldID(objCls, "y", "F");
@@ -548,10 +521,10 @@ JNIEXPORT jboolean JNICALL Java_com_example_lksynthesizeapp_YoloV5Ncnn_Init(JNIE
 }
 
 // public native Obj[] Detect(Bitmap bitmap, boolean use_gpu);
-JNIEXPORT jobjectArray JNICALL Java_com_example_lksynthesizeapp_YoloV5Ncnn_Detect(JNIEnv* env, jobject thiz, jobject bitmap, jboolean use_gpu)
-{
-    if (use_gpu == JNI_TRUE && ncnn::get_gpu_count() == 0)
-    {
+JNIEXPORT jobjectArray JNICALL
+Java_com_example_lksynthesizeapp_YoloV5Ncnn_Detect(JNIEnv *env, jobject thiz, jobject bitmap,
+                                                   jboolean use_gpu) {
+    if (use_gpu == JNI_TRUE && ncnn::get_gpu_count() == 0) {
         return NULL;
         //return env->NewStringUTF("no vulkan capable gpu");
     }
@@ -572,15 +545,12 @@ JNIEXPORT jobjectArray JNICALL Java_com_example_lksynthesizeapp_YoloV5Ncnn_Detec
     int w = width;
     int h = height;
     float scale = 1.f;
-    if (w > h)
-    {
-        scale = (float)target_size / w;
+    if (w > h) {
+        scale = (float) target_size / w;
         w = target_size;
         h = h * scale;
-    }
-    else
-    {
-        scale = (float)target_size / h;
+    } else {
+        scale = (float) target_size / h;
         h = target_size;
         w = w * scale;
     }
@@ -592,7 +562,8 @@ JNIEXPORT jobjectArray JNICALL Java_com_example_lksynthesizeapp_YoloV5Ncnn_Detec
     int wpad = (w + 31) / 32 * 32 - w;
     int hpad = (h + 31) / 32 * 32 - h;
     ncnn::Mat in_pad;
-    ncnn::copy_make_border(in, in_pad, hpad / 2, hpad - hpad / 2, wpad / 2, wpad - wpad / 2, ncnn::BORDER_CONSTANT, 114.f);
+    ncnn::copy_make_border(in, in_pad, hpad / 2, hpad - hpad / 2, wpad / 2, wpad - wpad / 2,
+                           ncnn::BORDER_CONSTANT, 114.f);
 
     // yolov5
     std::vector<Object> objects;
@@ -680,8 +651,7 @@ JNIEXPORT jobjectArray JNICALL Java_com_example_lksynthesizeapp_YoloV5Ncnn_Detec
         int count = picked.size();
 
         objects.resize(count);
-        for (int i = 0; i < count; i++)
-        {
+        for (int i = 0; i < count; i++) {
             objects[i] = proposals[picked[i]];
 
             // adjust offset to original unpadded
@@ -691,10 +661,10 @@ JNIEXPORT jobjectArray JNICALL Java_com_example_lksynthesizeapp_YoloV5Ncnn_Detec
             float y1 = (objects[i].y + objects[i].h - (hpad / 2)) / scale;
 
             // clip
-            x0 = std::max(std::min(x0, (float)(width - 1)), 0.f);
-            y0 = std::max(std::min(y0, (float)(height - 1)), 0.f);
-            x1 = std::max(std::min(x1, (float)(width - 1)), 0.f);
-            y1 = std::max(std::min(y1, (float)(height - 1)), 0.f);
+            x0 = std::max(std::min(x0, (float) (width - 1)), 0.f);
+            y0 = std::max(std::min(y0, (float) (height - 1)), 0.f);
+            x1 = std::max(std::min(x1, (float) (width - 1)), 0.f);
+            y1 = std::max(std::min(y1, (float) (height - 1)), 0.f);
 
             objects[i].x = x0;
             objects[i].y = y0;
@@ -704,14 +674,13 @@ JNIEXPORT jobjectArray JNICALL Java_com_example_lksynthesizeapp_YoloV5Ncnn_Detec
     }
 
     // objects to Obj[]
-    static const char* class_names[] = {
+    static const char *class_names[] = {
             "Circulardefect", "crack"
     };
 
     jobjectArray jObjArray = env->NewObjectArray(objects.size(), objCls, NULL);
 
-    for (size_t i=0; i<objects.size(); i++)
-    {
+    for (size_t i = 0; i < objects.size(); i++) {
         jobject jObj = env->NewObject(objCls, constructortorId, thiz);
 
         env->SetFloatField(jObj, xId, objects[i].x);
@@ -731,7 +700,6 @@ JNIEXPORT jobjectArray JNICALL Java_com_example_lksynthesizeapp_YoloV5Ncnn_Detec
 }
 
 
-
 JNIEXPORT jstring JNICALL
 Java_com_example_lksynthesizeapp_ChiFen_Activity_BroadcastMediaCodecActivity_stringFromJNI(
         JNIEnv *env,
@@ -742,7 +710,8 @@ Java_com_example_lksynthesizeapp_ChiFen_Activity_BroadcastMediaCodecActivity_str
 
 
 JNIEXPORT jboolean JNICALL
-Java_com_example_lksynthesizeapp_ChiFen_MediaCodec_ScreenLive_connect(JNIEnv *env, jobject thiz, jstring url_) {
+Java_com_example_lksynthesizeapp_ChiFen_MediaCodec_ScreenLive_connect(JNIEnv *env, jobject thiz,
+                                                                      jstring url_) {
 
     // 首先 Java 的转成 C 的字符串，不然无法使用
     const char *url = env->GetStringUTFChars(url_, 0);
@@ -773,16 +742,17 @@ Java_com_example_lksynthesizeapp_ChiFen_MediaCodec_ScreenLive_connect(JNIEnv *en
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_example_lksynthesizeapp_ChiFen_MediaCodec_ScreenLive_disConnect(JNIEnv *env, jobject thiz) {
+Java_com_example_lksynthesizeapp_ChiFen_MediaCodec_ScreenLive_disConnect(JNIEnv *env,
+                                                                         jobject thiz) {
 
-    if (live){
-        if (live->sps){
+    if (live) {
+        if (live->sps) {
             free(live->sps);
         }
-        if (live->pps){
+        if (live->pps) {
             free(live->pps);
         }
-        if (live->rtmp){
+        if (live->rtmp) {
             RTMP_Close(live->rtmp);
             RTMP_Free(live->rtmp);
         }
@@ -793,8 +763,10 @@ Java_com_example_lksynthesizeapp_ChiFen_MediaCodec_ScreenLive_disConnect(JNIEnv 
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_example_lksynthesizeapp_ChiFen_MediaCodec_ScreenLive_sendData(JNIEnv *env, jobject thiz, jbyteArray data_,
-                                                                       jint len, jlong tms, jint type) {
+Java_com_example_lksynthesizeapp_ChiFen_MediaCodec_ScreenLive_sendData(JNIEnv *env, jobject thiz,
+                                                                       jbyteArray data_,
+                                                                       jint len, jlong tms,
+                                                                       jint type) {
     int ret;
     jbyte *data = env->GetByteArrayElements(data_, NULL);
     switch (type) {

@@ -44,3 +44,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "LKSynthesizeAPP"
 include ':app'
+include ':poilib'
