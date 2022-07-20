@@ -4,24 +4,17 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.text.InputFilter;
-import android.text.InputType;
 import android.text.SpannableString;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
+import com.example.lksynthesizeapp.ChiFen.Modbus.ModbusCallBack;
 import com.example.lksynthesizeapp.R;
-
-import java.util.List;
 
 
 public class AlertDialogUtil {
@@ -109,6 +102,45 @@ public class AlertDialogUtil {
                     dialogCallBack.cancel();
                 }
             });
+            dialog.getWindow().setContentView(view);
+        }
+    }
+
+    public void showWriteDialog(String hint, final ModbusCallBack modbusCallBack) {
+        if (dialog == null || !dialog.isShowing()) {
+            dialog = new Dialog(context);
+            dialog.setCancelable(false);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.show();
+            LayoutInflater inflater = LayoutInflater.from(context);
+            View view = inflater.inflate(R.layout.dialog_with_write, null, false);
+            EditText editText = (EditText) view.findViewById(R.id.edittext);
+            SpannableString s = new SpannableString(hint);//这里输入自己想要的提示文字
+            editText.setHint(s);
+            TextView tvYes = (TextView) view.findViewById(R.id.yes);
+            TextView tvCover = (TextView) view.findViewById(R.id.cover);
+            tvYes.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (editText.getText().toString()!=null){
+                        if (!editText.getText().toString().equals("")){
+                            dialog.dismiss();
+                            modbusCallBack.success(editText.getText().toString());
+                        }
+                    }else {
+                        Toast.makeText(context, "请输入行走距离", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
+            tvCover.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.dismiss();
+                    modbusCallBack.fail("");
+                }
+            });
+
             dialog.getWindow().setContentView(view);
         }
     }

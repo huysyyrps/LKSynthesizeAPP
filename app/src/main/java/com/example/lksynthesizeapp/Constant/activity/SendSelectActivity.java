@@ -21,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.lksynthesizeapp.ChiFen.Activity.BroadcastMediaCodecActivity;
 import com.example.lksynthesizeapp.ChiFen.Activity.DescernActivity;
 import com.example.lksynthesizeapp.ChiFen.Activity.LocalActivity;
+import com.example.lksynthesizeapp.ChiFen.Activity.RobotActivity1;
 import com.example.lksynthesizeapp.Constant.Base.AlertDialogUtil;
 import com.example.lksynthesizeapp.Constant.Base.DialogCallBack;
 import com.example.lksynthesizeapp.Constant.Base.EditTextLengClient;
@@ -59,6 +60,8 @@ public class SendSelectActivity extends AppCompatActivity {
     LinearLayout linDiscern;
     //富有动感的Sheet弹窗
     Intent intent;
+    @BindView(R.id.linRobot)
+    LinearLayout linRobot;
     private String address = "";
     private static AlertDialogUtil alertDialogUtil;
     SharePreferencesUtils sharePreferencesUtils;
@@ -105,7 +108,7 @@ public class SendSelectActivity extends AppCompatActivity {
         });
     }
 
-    @OnClick({R.id.linLocak, R.id.linSocket, R.id.linDiscern})
+    @OnClick({R.id.linLocak, R.id.linSocket, R.id.linDiscern, R.id.linRobot})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.linLocak:
@@ -120,10 +123,14 @@ public class SendSelectActivity extends AppCompatActivity {
                 seSPData();
                 SelectActivity("在线检测");
                 break;
+            case R.id.linRobot:
+                seSPData();
+                SelectActivity("机器人");
+                break;
         }
     }
 
-    public void seSPData(){
+    public void seSPData() {
         sharePreferencesUtils.setString(SendSelectActivity.this, "project", etProject.getText().toString());
         sharePreferencesUtils.setString(SendSelectActivity.this, "workName", etWorkName.getText().toString());
         sharePreferencesUtils.setString(SendSelectActivity.this, "workCode", etWorkCode.getText().toString());
@@ -151,12 +158,16 @@ public class SendSelectActivity extends AppCompatActivity {
                 intent.putExtra("etWorkName", etWorkName.getText().toString().trim());
                 intent.putExtra("etWorkCode", etWorkCode.getText().toString().trim());
                 startActivity(intent);
-            }else if (data.equals("在线检测")) {
+            } else if (data.equals("在线检测")) {
                 sharePreferencesUtils.setString(SendSelectActivity.this, "sendSelect", "实时上传");
                 intent = new Intent(SendSelectActivity.this, DescernActivity.class);
                 intent.putExtra("project", etProject.getText().toString().trim());
                 intent.putExtra("etWorkName", etWorkName.getText().toString().trim());
                 intent.putExtra("etWorkCode", etWorkCode.getText().toString().trim());
+                startActivity(intent);
+            }else if (data.equals("机器人")) {
+                sharePreferencesUtils.setString(SendSelectActivity.this, "sendSelect", "机器人");
+                intent = new Intent(SendSelectActivity.this, RobotActivity1.class);
                 startActivity(intent);
             }
         }

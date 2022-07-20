@@ -245,7 +245,9 @@ public class DescernActivity extends AppCompatActivity implements View.OnClickLi
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mythread.interrupt();
+        if (mythread!=null){
+            mythread.interrupt();
+        }
         runing = false;
     }
 
@@ -283,7 +285,9 @@ public class DescernActivity extends AppCompatActivity implements View.OnClickLi
                 startActivity(intent);
                 break;
             case R.id.rbBack:
-                mythread.interrupt();
+                if (mythread!=null){
+                    mythread.interrupt();
+                }
                 runing = false;
                 finish();
                 break;

@@ -95,6 +95,7 @@ public class BroadcastMediaCodecActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        webView.setBackgroundColor(getColor(R.color.black));
         if (address==null){
             Toast.makeText(this, "为获取到设备IP,请重启设备和手机热点", Toast.LENGTH_SHORT).show();
             mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);

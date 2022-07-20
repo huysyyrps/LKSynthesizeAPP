@@ -35,7 +35,8 @@ public class DefinedActivity extends BaseActivity implements EasyPermissions.Per
     final int SCAN_FRAME_SIZE = 240;
     String[] PERMS = {Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.RECORD_AUDIO,Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.FOREGROUND_SERVICE};
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.FOREGROUND_SERVICE,
+            Manifest.permission.ACCESS_WIFI_STATE};
     SharePreferencesUtils sharePreferencesUtils;
 
     @Override
@@ -94,6 +95,22 @@ public class DefinedActivity extends BaseActivity implements EasyPermissions.Per
                 }
             }
         });
+    }
+    /**
+     * short数组转byte数组
+     * @param src
+     * @return
+     */
+    public byte[] toByteArray(short[] src) {
+
+        int count = src.length;
+        byte[] dest = new byte[count << 1];
+        for (int i = 0; i < count; i++) {
+            dest[i * 2] = (byte) ((src[i] >> 8) & 0xFF);
+            dest[i * 2 + 1] = (byte) (src[i] & 0xFF);
+        }
+
+        return dest;
     }
 
     @Override

@@ -46,6 +46,17 @@
         android:supportsRtl="true"
         android:theme="@style/NoAction"
         android:usesCleartextTraffic="true">
+        <uses-library android:name ="org.apache.http.legacy" android:required ="false"/>
+        <activity
+            android:name=".ChiFen.Activity.RobotActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"/>
+
+        <activity
+            android:name=".ChiFen.Activity.RobotActivity1"
+            android:exported="false"
+            android:screenOrientation="landscape"/>
+
         <meta-data
             android:name="PUSH_APPID"
             android:value="iinLTplUFn7b8Zy2dl8755" /> <!-- 接收来自个推的消息 -->
@@ -55,18 +66,20 @@
             android:name=".TestActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:windowSoftInputMode="stateHidden|adjustResize">
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
 
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.MAIN" /> -->
+
+
+            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+            <!-- </intent-filter> -->
         </activity>
-
         <activity
             android:name=".Constant.activity.WelcomeActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -98,7 +111,7 @@
             android:screenOrientation="landscape" />
         <activity
             android:name=".ChiFen.Activity.DescernActivity"
-            android:screenOrientation="landscape"></activity>
+            android:screenOrientation="landscape" />
     </application>
 
 </manifest>
